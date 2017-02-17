@@ -1,6 +1,6 @@
 
 // set bpm
-let bpm = 120
+let bpm = 300
 
 // convert that bpm into miliseconds
 let bpmInMs = 60000/bpm
