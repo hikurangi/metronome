@@ -1,0 +1,29 @@
+{
+  "name": "metronome",
+  "version": "1.0.0",
+  "description": "a javascript metronome with handy tools to work on groove and time feel",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hikurangi/metronome.git"
+  },
+  "keywords": [
+    "jazz",
+    "node",
+    "metronome",
+    "groove",
+    "time",
+    "javascript"
+  ],
+  "author": "hikurangi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hikurangi/metronome/issues"
+  },
+  "homepage": "https://github.com/hikurangi/metronome#readme"
+}
