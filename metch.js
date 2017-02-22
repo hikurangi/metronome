@@ -14,8 +14,6 @@ let currentBeat = 1
 // subdivision - at this point it seems worth setting all these values in a config object and checking that every beat.
 let subdivision = {}
 
-
-
 // metronome click function
 click = () => {
 
