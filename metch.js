@@ -7,6 +7,8 @@ let ms = 60000/bpm
 
 // bar length - default
 let barLength = 4
+
+// we start on (default to) beat 1 always
 let currentBeat = 1
 
 // metronome click function
