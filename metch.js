@@ -1,29 +1,24 @@
 
-// set bpm
-let bpm = 120 //needs sensible limitations, especially with subdivisions
+let config = {
+  bpm: 120, // set bpm
+  ms: () => { // convert that bpm into miliseconds
+    60000 / this.bpm
+  },
+  barLength: 4, // bar length - default 4/4
+  currentBeat: 1 // we start on (default to) beat 1 always
+}
 
-// convert that bpm into miliseconds
-let ms = 60000/bpm
-
-// bar length - default 4/4
-let barLength = 4
-
-// we start on (default to) beat 1 always
-let currentBeat = 1
-
-// subdivision - at this point it seems worth setting all these values in a config object and checking that every beat.
-let subdivision = {}
 
 // metronome click function
 click = () => {
 
   // log the current beat number
-  console.log(`Beat #${currentBeat}`)
+  console.log(`Beat #${config.currentBeat}`)
 
   // add one to it unless it is the same as the bar length
-  currentBeat < barLength ? currentBeat++ : currentBeat = 1
+  config.currentBeat < config.barLength ? config.currentBeat++ : config.currentBeat = 1
 
 }
 
 // print the word "TICK!" at that rate
-setInterval(click, ms) // may want to be a setTimeout within a for loop.
+setInterval(click, config.ms) // may want to be a setTimeout within a for loop.
