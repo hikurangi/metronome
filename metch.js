@@ -1,14 +1,13 @@
+"use strict"
 
 let config = {
   bpm: 120, // set bpm
   get ms() {
     return 60000 / this.bpm
-  },
+  }, // does this getter work with dynamically shifting bpm?
   barLength: 4, // bar length - default 4/4
   currentBeat: 1 // we start on (default to) beat 1 always
 }
-
-// need to set up a watcher
 
 // metronome click function
 click = () => {
