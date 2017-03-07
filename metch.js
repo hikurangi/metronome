@@ -5,12 +5,12 @@ let config = {
   get ms() {
     return 60000 / this.bpm
   }, // does this getter work with dynamically shifting bpm?
-  barLength: 4, // bar length - default 4/4
+  barLength: 9, // bar length - default 4/4
   currentBeat: 1 // we start on (default to) beat 1 always
 }
 
 // metronome click function
-click = () => {
+let click = () => {
 
   // log the current beat number
   console.log(`Beat #${config.currentBeat}`)
@@ -22,3 +22,7 @@ click = () => {
 
 // print the word "TICK!" at that rate
 setInterval(click, config.ms) // may want to be a setTimeout within a for loop.
+
+// click tempo
+// CLAP tempo using the machine's mic.
+// start stop
