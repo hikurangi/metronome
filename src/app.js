@@ -28,7 +28,9 @@ clickSound.addEventListener("loadeddata", () => {
   // push cloned sounds to a storage array
   for (let i = 0; i < loadLimit; i++) {
     // adding other subdivision/clicks will add a lot of complexity
-    if ( clickArr.length < loadLimit ) {
+    if ( clickArr.length === 0 ) {
+      clickArr.push(clickSound)
+    } else if ( clickArr.length < loadLimit ) {
       clickArr.push(clickSound.cloneNode())
     }
   }
