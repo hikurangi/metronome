@@ -6,7 +6,7 @@ let clickSound = document.querySelector('.click')
 let state = {
   inputBPM: 300, // set bpm from input
   tapTempoBPM: null, // set bpm from tap tempo
-  get tapTempoMs() {
+  get tapTempoMS() {
     return `no value yet ${this.tapTempoBPM}` // will use avg ms between taps. if setting tempo from this only start click from third tap?
   },
   get ms() {
