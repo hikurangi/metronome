@@ -1,6 +1,6 @@
 "use strict"
-  let clickSound = new Audio('audio/click.wav')
-  const beatOne = document.querySelector('.beat-one')
+
+  let clickSound = document.querySelector('.click')
 
   let config = {
     inputBPM: 100, // set bpm from input
@@ -16,22 +16,19 @@
     clickOn: true
   }
 
-
   // I want to play the same sound over and over and let it overlap as many times as necessary
 
   // app needs to calculate the maximum number of times this same sound will play simultaneously.
-  // is immediately invoked, resulting in NaN... what's up with that?
+  
+  clickSound.addEventListener("loadedmetadata", () => {
+    console.log("clickSound loaded");
+    console.log("Audio duration: ", clickSound.duration);
+  })
 
-  let durationCheck = () => {
-      return clickSound.duration;
-  }
-  clickSound.onloadeddata = durationCheck
 
   // how many sounds need to be preloaded in order to have enough?
 
   // convert durationCheck result into ms
-  let soundDurationInMS = 1000 * clickSound.onloadeddata()
-  console.log({soundDurationInMS});
 
   // needs to be done every time the tempo is reset
 
@@ -40,8 +37,6 @@
   // metronome click function
   let click = () => {
     // check if a sound is already playing or the sound has not been played (this second option will be replaced with a check for whether )
-    let soundDurationInMS = 1000 * clickSound.onloadeddata()
-    console.log({soundDurationInMS});
 
     if ( config.clickOn || clickSound.ended || clickCopy.ended ) {
       clickSound.play()
@@ -54,6 +49,7 @@
 
     // add one to it unless it is the same as the bar length
     config.currentBeat < config.barLength ? config.currentBeat++ : config.currentBeat = 1
+
   }
 
   // print the word "TICK!" at that rate
