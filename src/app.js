@@ -22,15 +22,18 @@ clickSound.addEventListener("loadeddata", () => {
   let loadLimit = Math.ceil(1000 * clickSound.duration / config.ms)
 
   let clickArr = []
+
   for (let i = 0; i < loadLimit; i++) {
-    clickArr = []
-    clickArr.push(clickSound.cloneNode())
+    if ( clickArr.length < loadLimit ) {
+      clickArr.push(clickSound.cloneNode())
+    } else {
+      break
+    }
   }
 
   console.log({clickArr, config});
   // metronome click function - simplified solution works for slow tempos only. need to trim sound
   let click = () => {
-    clickArr.push(clickSound.cloneNode())
     console.log(`Beat #${config.currentBeat}`)
     // check if a sound is already playing or the sound has not been played (this second option will be replaced with a check for whether )
     clickArr[config.arrPosition].play()
