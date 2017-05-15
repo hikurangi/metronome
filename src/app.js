@@ -19,12 +19,11 @@
   // I want to play the same sound over and over and let it overlap as many times as necessary
 
   // app needs to calculate the maximum number of times this same sound will play simultaneously.
-  
+
   clickSound.addEventListener("loadedmetadata", () => {
     console.log("clickSound loaded");
-    console.log("Audio duration: ", clickSound.duration);
+    console.log("Audio duration in ms: ", 1000 * clickSound.duration);
   })
-
 
   // how many sounds need to be preloaded in order to have enough?
 
