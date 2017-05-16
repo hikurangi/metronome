@@ -6,8 +6,10 @@ const onSwitch = document.querySelector('#onswitch')
 
 // when the button is if the click is set to on in the state, start the click for an interval set by state.ms.
 let clickInterval // create an ID for setInterval and clearInterval to dynamically change
-onSwitch.addEventListener('click', () => {
+onSwitch.addEventListener('click', function() {
+  // change button text
   state.switchedOn = !state.switchedOn
+  this.innerHTML === "On" ? this.innerHTML = "Off" : this.innerHTML = "On"
   state.switchedOn ? clickInterval = setInterval(click, state.ms) : clearInterval(clickInterval)
 })
 
@@ -62,6 +64,9 @@ let click = () => {
 // INITIAL GOALS
 
 // trim wav down at front (not at tail)
+// add tempo input
+  // 1. when you turn on the metch, it blasts off at the tempo you specify
+  // 2. event handler which updates the metronome tempo live (that might already work since the setInterval is using a tempo from state)
 // add tap tempo
 // css coloured bloop matches wave amplitude
 // add subdivisions - 8ths, 16ths, 32nds, any tuplet
