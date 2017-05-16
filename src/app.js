@@ -5,9 +5,10 @@ const clickSound = new Audio('audio/click.wav') // path relative to index.html, 
 const onButton = document.querySelector('#onswitch')
 
 // when the button is if the click is set to on in the state, start the click for an interval set by state.ms.
+let clickInterval
 onButton.addEventListener('click', () => {
   state.switchedOn = !state.switchedOn
-  state.switchedOn ? setInterval(click, state.ms) : clearInterval()
+  state.switchedOn ? clickInterval = setInterval(click, state.ms) : clearInterval(clickInterval)
 })
 
 // config
