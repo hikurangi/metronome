@@ -11,7 +11,7 @@ onSwitch.addEventListener('click', () => {
   state.switchedOn ? clickInterval = setInterval(click, state.ms) : clearInterval(clickInterval)
 })
 
-// config
+// State / Config Object
 const state = {
   inputBPM: 255, // set bpm from input
   tapTempoBPM: null, // set bpm from tap tempo
@@ -27,6 +27,7 @@ const state = {
   switchedOn: false, // metronome begins in off position
   clickArr: []
 }
+
 
 clickSound.addEventListener("loadeddata", () => {
   let loadLimit = Math.ceil(1000 * clickSound.duration / state.ms) // determine the minimum number of cloned sounds required. should change every time the tempo is changed
@@ -58,6 +59,15 @@ let click = () => {
   state.arrPosition < state.clickArr.length - 1 ? state.arrPosition++ : state.arrPosition = 0
 }
 
-// add tap tempo
+// INITIAL GOALS
 
-// css bloop matches wave amplitude
+// trim wav down at front (not at tail)
+// add tap tempo
+// css coloured bloop matches wave amplitude
+// add subdivisions - 8ths, 16ths, 32nds, any tuplet
+// slick interface
+
+// STRETCH GOALS
+
+// "musician features" - x bars on, x bars off
+// x bars on - specify a percentage of clicks to drop out for x bars.
