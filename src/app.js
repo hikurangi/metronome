@@ -14,7 +14,7 @@ onSwitch.addEventListener('click', function() {
 
 const bpmInput = document.querySelector('#number-input')
 bpmInput.addEventListener('input', function(e) {
-  console.log({e});
+  state.inputBPM = e.target.value // after changing these settings and turning the metch on + off again, the first two beats of each bar play, but not subsequent beats.
 })
 
 // clear input when clicked
@@ -24,13 +24,13 @@ bpmInput.addEventListener('focus', function() {
 
 // State / Config Object
 const state = {
-  inputBPM: '100', // set bpm from input. default to a leisurely 100bpm
+  inputBPM: 100, // set bpm from input. default to a leisurely 100bpm
   tapTempoBPM: null, // set bpm from tap tempo
   get tapTempoMS() {
     return `no value yet ${this.tapTempoBPM}` // will use avg ms between taps. if setting tempo from this only start click from third tap?
   },
   get ms() {
-    return 60000 / +this.inputBPM
+    return 60000 / this.inputBPM
   },
   barLength: 4, // bar length in number of beats - default 4
   currentBeat: 1, // we start on (default to) beat 1 always
