@@ -2,11 +2,11 @@
 
 // const clickSound = document.querySelector('.click')
 const clickSound = new Audio('audio/click.wav') // path relative to index.html, not this js file.
-const onButton = document.querySelector('#onswitch')
+const onSwitch = document.querySelector('#onswitch')
 
 // when the button is if the click is set to on in the state, start the click for an interval set by state.ms.
-let clickInterval
-onButton.addEventListener('click', () => {
+let clickInterval // create an ID for setInterval and clearInterval to dynamically change
+onSwitch.addEventListener('click', () => {
   state.switchedOn = !state.switchedOn
   state.switchedOn ? clickInterval = setInterval(click, state.ms) : clearInterval(clickInterval)
 })
@@ -29,7 +29,6 @@ const state = {
 }
 
 clickSound.addEventListener("loadeddata", () => {
-
   let loadLimit = Math.ceil(1000 * clickSound.duration / state.ms) // determine the minimum number of cloned sounds required. should change every time the tempo is changed
 
   for (let i = 0; i < loadLimit; i++) { // loop which will push cloned sounds to a storage array
@@ -40,7 +39,6 @@ clickSound.addEventListener("loadeddata", () => {
     } else if ( state.clickArr.length < loadLimit ) { // otherwise if the clickArray is shorter than the click limit
       state.clickArr.push(clickSound.cloneNode()) // add another clone of the clickSound to it
     }
-
   }
 })
 
@@ -60,5 +58,6 @@ let click = () => {
   state.arrPosition < state.clickArr.length - 1 ? state.arrPosition++ : state.arrPosition = 0
 }
 
-
 // add tap tempo
+
+// css bloop matches wave amplitude
