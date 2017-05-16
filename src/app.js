@@ -3,7 +3,6 @@
 // const clickSound = document.querySelector('.click')
 const clickSound = new Audio('audio/click.wav') // path relative to index.html, not this js file.
 const onSwitch = document.querySelector('#onswitch')
-
 // when the button is if the click is set to on in the state, start the click for an interval set by state.ms.
 let clickInterval // create an ID for setInterval and clearInterval to dynamically change
 onSwitch.addEventListener('click', function() {
@@ -13,15 +12,25 @@ onSwitch.addEventListener('click', function() {
   state.switchedOn ? clickInterval = setInterval(click, state.ms) : clearInterval(clickInterval)
 })
 
+const bpmInput = document.querySelector('#number-input')
+bpmInput.addEventListener('input', function(e) {
+  console.log({e});
+})
+
+// clear input when clicked
+bpmInput.addEventListener('focus', function() {
+  state.inputBPM = ''
+})
+
 // State / Config Object
 const state = {
-  inputBPM: 255, // set bpm from input
+  inputBPM: '100', // set bpm from input. default to a leisurely 100bpm
   tapTempoBPM: null, // set bpm from tap tempo
   get tapTempoMS() {
     return `no value yet ${this.tapTempoBPM}` // will use avg ms between taps. if setting tempo from this only start click from third tap?
   },
   get ms() {
-    return 60000 / this.inputBPM
+    return 60000 / +this.inputBPM
   },
   barLength: 4, // bar length in number of beats - default 4
   currentBeat: 1, // we start on (default to) beat 1 always
