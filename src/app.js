@@ -19,7 +19,7 @@ bpmInput.addEventListener('input', function(e) {
 
 // clear input when clicked
 bpmInput.addEventListener('focus', function() {
-  state.inputBPM = ''
+  state.inputBPM = '' // does not clear values
 })
 
 // State / Config Object
