@@ -5,11 +5,17 @@ const clickSound = new Audio('audio/click.wav') // path relative to index.html, 
 const onSwitch = document.querySelector('#onswitch')
 // when the button is if the click is set to on in the state, start the click for an interval set by state.ms.
 let clickInterval // create an ID for setInterval and clearInterval to dynamically change
+
+const switchedOff = () => {
+  clearInterval(clickInterval)
+  state.currentBeat = 1
+}
+
 onSwitch.addEventListener('click', function() {
   // change button text
   state.switchedOn = !state.switchedOn
   this.innerHTML === "On" ? this.innerHTML = "Off" : this.innerHTML = "On"
-  state.switchedOn ? clickInterval = setInterval(click, state.ms) : clearInterval(clickInterval)
+  state.switchedOn ? clickInterval = setInterval(click, state.ms) : switchedOff()
 })
 
 const bpmInput = document.querySelector('#number-input')
@@ -18,7 +24,7 @@ bpmInput.addEventListener('input', function(e) {
 })
 
 // clear input when clicked
-bpmInput.addEventListener('focus', function() {
+bpmInput.addEventListener('focus', function() { // should be onClicks
   state.inputBPM = '' // does not clear values
 })
 
@@ -36,10 +42,10 @@ const state = {
   currentBeat: 1, // we start on (default to) beat 1 always
   arrPosition: 0, // track our position in the array of overlap sounds
   switchedOn: false, // metronome begins in off position
-  clickArr: []
+  clickArr: [] // perhaps should not be in state
 }
 
-
+// Sound Stacker - creates an array of cloned click sounds to allow the wav to overlap if necessary (fast tempos)
 clickSound.addEventListener("loadeddata", () => {
   let loadLimit = Math.ceil(1000 * clickSound.duration / state.ms) // determine the minimum number of cloned sounds required. should change every time the tempo is changed
 
@@ -54,8 +60,7 @@ clickSound.addEventListener("loadeddata", () => {
   }
 })
 
-  // metronome click function
-
+// The Click - actually plays the click sound
 let click = () => {
   // log which beat we're at. this should be delayed by a quarter of the clickSound.duration so that it pops right about where the click itself is.
   console.log(`Beat #${state.currentBeat}`)
