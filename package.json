@@ -4,7 +4,9 @@
   "description": "a javascript metronome with handy tools to work on groove and time feel",
   "main": "index.js",
   "dependencies": {},
-  "devDependencies": {},
+  "devDependencies": {
+    "webpack": "^2.5.1"
+  },
   "scripts": {
     "test": "test"
   },
