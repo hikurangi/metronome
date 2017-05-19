@@ -76,6 +76,9 @@ let click = () => {
   state.arrPosition < state.clickArr.length - 1 ? state.arrPosition++ : state.arrPosition = 0
 }
 
+// BLOCKS
+// 1. sound array does not fill completely after tempo is changed. need to look at control flow
+
 // INITIAL GOALS
 
 // add tempo input
