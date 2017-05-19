@@ -6,14 +6,24 @@ const onSwitch = document.querySelector('#onswitch')
 // when the button is if the click is set to on in the state, start the click for an interval set by state.ms.
 let clickInterval // create an ID for setInterval and clearInterval to dynamically change
 
+// abstracted but very readable imo
 onSwitch.addEventListener('click', function() {
-  // change button text
-  state.switchedOn = !state.switchedOn
-  // problematic - multiple sources of truth
-  this.innerHTML === "On" ? this.innerHTML = "Off" : this.innerHTML = "On"
-  state.switchedOn ? clickInterval = setInterval(click, state.ms) : switchedOff()
+  textAndStateToggle()
+  state.switched.on ? switchedOn() : switchedOff()
 })
 
+// could define this function inside of the event listener with standard function notation, preserving the appropriate 'this' context.
+const textAndStateToggle = () => {
+  state.switched.on = !state.switched.on
+  onSwitch.innerHTML = state.switched.text
+}
+
+// unnecessary but for consistency's sake
+const switchedOn = () => {
+  clickInterval = setInterval(click, state.ms)
+}
+
+// allows the ternary to do two things as a result of
 const switchedOff = () => {
   clearInterval(clickInterval)
   state.currentBeat = 1
@@ -42,7 +52,12 @@ const state = {
   barLength: 4, // bar length in number of beats - default 4
   currentBeat: 1, // we start on (default to) beat 1 always
   arrPosition: 0, // track our position in the array of overlap sounds
-  switchedOn: false, // metronome begins in off position
+  switched: { // a single source of truth
+    on: false, // metronome begins in off position
+    get text() {
+      return this.on === true ? "On" : "Off"
+    }
+  },
   clickArr: [] // perhaps should not be in state
 }
 
