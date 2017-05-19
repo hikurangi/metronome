@@ -9,24 +9,22 @@ let clickInterval // create an ID for setInterval and clearInterval to dynamical
 // abstracted but very readable imo
 onSwitch.addEventListener('click', function() {
   textAndStateToggle()
-  state.switched.on ? switchedOn() : switchedOff()
 })
 
 // could define this function inside of the event listener with standard function notation, preserving the appropriate 'this' context.
 const textAndStateToggle = () => {
   state.switched.on = !state.switched.on
   onSwitch.innerHTML = state.switched.text
+  switcher()
 }
 
-// unnecessary but for consistency's sake
-const switchedOn = () => {
-  clickInterval = setInterval(click, state.ms)
-}
-
-// allows the ternary to do two things as a result of
-const switchedOff = () => {
-  clearInterval(clickInterval)
-  state.currentBeat = 1
+const switcher = () => {
+  if (state.switched.on) {
+    clickInterval = setInterval(click, state.ms)
+  } else {
+    clearInterval(clickInterval)
+    state.currentBeat = 1
+  }
 }
 
 const bpmInput = document.querySelector('#number-input')
@@ -95,7 +93,6 @@ let click = () => {
 // 1. sound array does not fill completely after tempo is changed. need to look at control flow
 
 // INITIAL GOALS
-
 // add tempo input
   // 1. when you turn on the metch, it blasts off at the tempo you specify
   // 2. event handler which updates the metronome tempo live (that might already work since the setInterval is using a tempo from state)
@@ -105,6 +102,8 @@ let click = () => {
 // slick interface
 
 // STRETCH GOALS
-
 // "musician features" - x bars on, x bars off
 // x bars on - specify a percentage of clicks to drop out for x bars.
+
+// TESTING
+// 1. when metch is switched on, it always starts with beat 1 - requires multiple runs ... actually difficult to test
