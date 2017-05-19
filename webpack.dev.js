@@ -12,20 +12,9 @@ module.exports = {
   },
   module: {
     rules: [
-      {
-        test: /\.css$/,
-        use: ExtractTextPlugin.extract({
-            use: 'css-loader'
-          })
-      },
-      {
-        test: /\.wav$/,
-        use: 'file-loader'
-      },
-      {
-        test: /\.html$/,
-        use: 'html-loader'
-      }
+      { test: /\.css$/, use: ExtractTextPlugin.extract({ use: 'css-loader'}) },
+      { test: /\.wav$/, use: 'file-loader' },
+      { test: /\.html$/, use: 'html-loader' }
     ]
   },
   plugins: [
