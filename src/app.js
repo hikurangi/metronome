@@ -4,20 +4,15 @@
 const clickSound = new Audio('audio/click.wav') // path relative to index.html, not this js file.
 const onSwitch = document.querySelector('#onswitch')
 // when the button is if the click is set to on in the state, start the click for an interval set by state.ms.
-let clickInterval // create an ID for setInterval and clearInterval to dynamically change
 
 // abstracted but very readable imo
 onSwitch.addEventListener('click', function() {
-  textAndStateToggle()
+  state.switched.on = !state.switched.on
+  this.innerHTML = state.switched.text
+  switcher()
 })
 
-// could define this function inside of the event listener with standard function notation, preserving the appropriate 'this' context.
-const textAndStateToggle = () => {
-  state.switched.on = !state.switched.on
-  onSwitch.innerHTML = state.switched.text
-  switcher()
-}
-
+let clickInterval // create an ID for setInterval and clearInterval to dynamically change
 const switcher = () => {
   if (state.switched.on) {
     clickInterval = setInterval(click, state.ms)
@@ -30,6 +25,7 @@ const switcher = () => {
 const bpmInput = document.querySelector('#number-input')
 bpmInput.addEventListener('input', function(e) {
   state.inputBPM = e.target.value // after changing these settings and turning the metch on + off again, the first two beats of each bar play, but not subsequent beats.
+  loader()
 })
 
 // clear input when clicked
@@ -62,7 +58,19 @@ const state = {
 // Sound Stacker - creates an array of cloned click sounds to allow the wav to overlap if necessary (fast tempos)
 clickSound.addEventListener("loadeddata", () => {
   let loadLimit = Math.ceil(1000 * clickSound.duration / state.ms) // determine the minimum number of cloned sounds required. should change every time the tempo is changed
+  loader()
+})
 
+// loadLimit calculates how many sounds to add to state.clickArray
+const loadLimit = () => {
+  console.log('loadLimit', Math.ceil(1000 * clickSound.duration / state.ms));
+  return Math.ceil(1000 * clickSound.duration / state.ms)
+}
+
+// Sound loader - function to be invoked after loadLimit changes
+const loader = () => {
+  console.log({state});
+  loadLimit()
   for (let i = 0; i < loadLimit; i++) { // loop which will push cloned sounds to a storage array
     // adding other subdivision/clicks will add a lot of complexity
     if ( state.clickArr.length > loadLimit ) { // if the array of stored clicks is bigger than the necessary click limit
@@ -72,7 +80,7 @@ clickSound.addEventListener("loadeddata", () => {
       state.clickArr.push(clickSound.cloneNode()) // add another clone of the clickSound to it
     }
   }
-})
+}
 
 // The Click - actually plays the click sound
 let click = () => {
