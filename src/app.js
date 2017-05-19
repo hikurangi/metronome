@@ -9,6 +9,7 @@ let clickInterval // create an ID for setInterval and clearInterval to dynamical
 onSwitch.addEventListener('click', function() {
   // change button text
   state.switchedOn = !state.switchedOn
+  // problematic - multiple sources of truth
   this.innerHTML === "On" ? this.innerHTML = "Off" : this.innerHTML = "On"
   state.switchedOn ? clickInterval = setInterval(click, state.ms) : switchedOff()
 })
