@@ -2,12 +2,13 @@
   "name": "metronome.js",
   "version": "1.0.0",
   "description": "a javascript metronome with handy tools to work on groove and time feel",
-  "main": "index.js",
+  "main": "app/index.js",
   "dependencies": {},
   "devDependencies": {
     "webpack": "^2.5.1"
   },
   "scripts": {
+    "start": "webpack --config webpack.config.js",
     "test": "test"
   },
   "repository": {
