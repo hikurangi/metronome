@@ -6,11 +6,12 @@
   "dependencies": {},
   "devDependencies": {
     "css-loader": "^0.28.1",
+    "extract-text-webpack-plugin": "^2.1.0",
     "style-loader": "^0.17.0",
     "webpack": "^2.5.1"
   },
   "scripts": {
-    "start-dev": "npm run build && webpack --config webpack.dev.js",
+    "start-dev": "webpack --config webpack.dev.js",
     "start": "webpack --config webpack.config.js",
     "build": "",
     "test": "test"
