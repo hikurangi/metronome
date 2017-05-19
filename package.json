@@ -13,9 +13,9 @@
     "webpack": "^2.5.1"
   },
   "scripts": {
-    "start-dev": "webpack --config webpack.dev.js",
+    "start-dev": "npm run build && webpack-dev-server --open webpack.dev.js",
     "start": "webpack --config webpack.config.js",
-    "build": "",
+    "build": "cp index.html dist/index.html",
     "test": "test"
   },
   "repository": {

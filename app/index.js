@@ -6,7 +6,7 @@ import clickWav from './audio/click.wav'
 import index from '../index.html'
 
 // const clickSound = document.querySelector('.click')
-const clickSound = new Audio(clickWav) // path relative to index.html, not this js file.
+const clickSound = new Audio(clickWav)
 const onSwitch = document.querySelector('#onswitch')
 // when the button is if the click is set to on in the state, start the click for an interval set by state.ms.
 
