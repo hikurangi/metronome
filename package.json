@@ -1,5 +1,5 @@
 {
-  "name": "metronome",
+  "name": "metronome.js",
   "version": "1.0.0",
   "description": "a javascript metronome with handy tools to work on groove and time feel",
   "main": "index.js",
