@@ -11,20 +11,22 @@ module.exports = {
     filename: 'bundle.js'
   },
   module: {
-    rules: [{
-      test: /\.css$/,
-      use: ExtractTextPlugin.extract({
-        use: 'css-loader'
-      })
-    },
-    {
-      test: /\.wav$/,
-      use: 'file-loader'
-    },
-    {
-      test: /\.html$/,
-      use: 'html-loader'
-    }],
+    rules: [
+      {
+        test: /\.css$/,
+        use: ExtractTextPlugin.extract({
+            use: 'css-loader'
+          })
+      },
+      {
+        test: /\.wav$/,
+        use: 'file-loader'
+      },
+      {
+        test: /\.html$/,
+        use: 'html-loader'
+      }
+    ]
   },
   plugins: [
     new ExtractTextPlugin('styles.css')

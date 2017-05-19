@@ -15,7 +15,7 @@
   "scripts": {
     "start-dev": "webpack --config webpack.dev.js",
     "start": "webpack --config webpack.config.js",
-    "build": "cp index.html dist",
+    "build": "",
     "test": "test"
   },
   "repository": {

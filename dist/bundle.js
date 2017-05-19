@@ -82,7 +82,7 @@ module.exports = __webpack_require__.p + "d8ebb2aa988b75d743d7ee9b06593deb.wav";
 /* 2 */
 /***/ (function(module, exports) {
 
-module.exports = "<!doctype html>\r\n\r\n<html lang=\"en\">\r\n<head>\r\n  <meta charset=\"utf-8\">\r\n  <title>Metronome.js</title>\r\n  <meta name=\"description\" content=\"Metronomejs\">\r\n  <meta name=\"author\" content=\"Hikurangi\">\r\n  <link rel=\"stylesheet\" href=\"styles.css\">\r\n</head>\r\n\r\n<body>\r\n\r\n<input id=\"number-input\" type=\"number\">\r\n<button id=\"onswitch\" type=\"button\">Off</button> <!--- perhaps give the button no innerHTML and let the JS handle it --->\r\n<script src=\"bundle.js\"></script>\r\n\r\n</body>\r\n</html>\r\n";
+module.exports = "<!doctype html>\r\n\r\n<html lang=\"en\">\r\n<head>\r\n  <meta charset=\"utf-8\">\r\n  <title>Metronome.js</title>\r\n  <meta name=\"description\" content=\"Metronomejs\">\r\n  <meta name=\"author\" content=\"Hikurangi\">\r\n  <link rel=\"stylesheet\" href=\"styles.css\">\r\n</head>\r\n\r\n<body>\r\n\r\n<input id=\"number-input\" type=\"number\">\r\n<button id=\"onswitch\" type=\"button\">Off</button> <!--- perhaps give the button no innerHTML and let the JS handle it --->\r\n<script src=\"dist/bundle.js\"></script>\r\n\r\n</body>\r\n</html>\r\n";
 
 /***/ }),
 /* 3 */
