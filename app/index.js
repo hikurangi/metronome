@@ -1,7 +1,10 @@
 "use strict"
 
+// Webpack config
+import styles from './css/styles.css'
+
 // const clickSound = document.querySelector('.click')
-const clickSound = new Audio('audio/click.wav') // path relative to index.html, not this js file.
+const clickSound = new Audio('./audio/click.wav') // path relative to index.html, not this js file.
 const onSwitch = document.querySelector('#onswitch')
 // when the button is if the click is set to on in the state, start the click for an interval set by state.ms.
 
