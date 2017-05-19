@@ -16,13 +16,15 @@ module.exports = {
       use: ExtractTextPlugin.extract({
         use: 'css-loader'
       })
+    },
+    {
+      test: /\.wav$/,
+      use: 'file-loader'
+    },
+    {
+      test: /\.html$/,
+      use: 'html-loader'
     }],
-    loaders: [
-      {
-        test: /\.wav$/,
-        use: ['file-loader']
-      }
-    ]
   },
   plugins: [
     new ExtractTextPlugin('styles.css')

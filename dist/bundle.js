@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 3);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -74,19 +74,37 @@
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "d8ebb2aa988b75d743d7ee9b06593deb.wav";
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports) {
+
+module.exports = "<!doctype html>\r\n\r\n<html lang=\"en\">\r\n<head>\r\n  <meta charset=\"utf-8\">\r\n  <title>Metronome.js</title>\r\n  <meta name=\"description\" content=\"Metronomejs\">\r\n  <meta name=\"author\" content=\"Hikurangi\">\r\n  <link rel=\"stylesheet\" href=\"styles.css\">\r\n</head>\r\n\r\n<body>\r\n\r\n<input id=\"number-input\" type=\"number\">\r\n<button id=\"onswitch\" type=\"button\">Off</button> <!--- perhaps give the button no innerHTML and let the JS handle it --->\r\n<script src=\"bundle.js\"></script>\r\n\r\n</body>\r\n</html>\r\n";
+
+/***/ }),
+/* 3 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__css_styles_css__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__css_styles_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__css_styles_css__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__audio_click_wav__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__audio_click_wav___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__audio_click_wav__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__index_html__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__index_html___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__index_html__);
 
 
-// Webpack config
+// Webpack imports
+
+
 
 
 // const clickSound = document.querySelector('.click')
-const clickSound = new Audio('./audio/click.wav') // path relative to index.html, not this js file.
+const clickSound = new Audio(__WEBPACK_IMPORTED_MODULE_1__audio_click_wav___default.a) // path relative to index.html, not this js file.
 const onSwitch = document.querySelector('#onswitch')
 // when the button is if the click is set to on in the state, start the click for an interval set by state.ms.
 
