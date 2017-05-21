@@ -3,7 +3,8 @@ const path = require('path')
 
 const buildDevDir = './build-dev'
 
-if (fs.existsSync(buildDevDir)) {
+// 1. Create the build-dev directory. Delete and create if it exists
+if (!fs.existsSync(buildDevDir)) {
   fs.mkdirSync(buildDevDir)
 } else {
   fs.remove(buildDevDir)
