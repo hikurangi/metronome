@@ -8,6 +8,8 @@ import index from '../index.html'
 import { app } from './js/domSetup'
 console.log({app}); // make sure the destructuring is working
 
+import click from './js/click'
+import state rom './js/state'
 // const clickSound = document.querySelector('.click')
 const clickSound = new Audio(clickWav)
 const onSwitch = document.querySelector('#onswitch')
@@ -41,28 +43,6 @@ bpmInput.addEventListener('focus', function() { // should be onClicks
   state.inputBPM = '' // does not clear values
 })
 
-// State / Config Object
-const state = {
-  inputBPM: 100, // set bpm from input. default to a leisurely 100bpm
-  tapTempoBPM: null, // set bpm from tap tempo
-  get tapTempoMS() {
-    return `no value yet ${this.tapTempoBPM}` // will use avg ms between taps. if setting tempo from this only start click from third tap?
-  },
-  get ms() {
-    return 60000 / this.inputBPM
-  },
-  barLength: 4, // bar length in number of beats - default 4
-  currentBeat: 1, // we start on (default to) beat 1 always
-  arrPosition: 0, // track our position in the array of overlap sounds
-  switched: { // a single source of truth
-    on: false, // metronome begins in off position
-    get text() {
-      return this.on === true ? "On" : "Off"
-    }
-  },
-  clickArr: [] // perhaps should not be in state
-}
-
 // Sound Stacker - creates an array of cloned click sounds to allow the wav to overlap if necessary (fast tempos)
 clickSound.addEventListener("loadeddata", () => {
   let loadLimit = Math.ceil(1000 * clickSound.duration / state.ms) // determine the minimum number of cloned sounds required. should change every time the tempo is changed
@@ -90,20 +70,7 @@ const loader = () => {
   }
 }
 
-// The Click - actually plays the click sound
-let click = () => {
-  // log which beat we're at. this should be delayed by a quarter of the clickSound.duration so that it pops right about where the click itself is.
-  console.log(`Beat #${state.currentBeat}`)
-  // setTimeout(() => {}, clickSound.duration * 1000 / 4 ) // * 1000 miliseconds / 4 25% thru
 
-  // play the click at the current position in the clickArr(ay)
-  state.clickArr[state.arrPosition].play()
-
-  // add one to the currentBeat tracker while it's less than the bar length, otherwise reset it to beat 1
-  state.currentBeat < state.barLength ? state.currentBeat++ : state.currentBeat = 1
-  // increment through the clickArray using the state's position tracker
-  state.arrPosition < state.clickArr.length - 1 ? state.arrPosition++ : state.arrPosition = 0
-}
 
 // BLOCKS
 // 1. sound array does not fill completely after tempo is changed. need to look at control flow
