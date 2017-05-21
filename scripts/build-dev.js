@@ -14,12 +14,7 @@ const buildDevDir = 'build-dev'
 
 // 1. Create the build-dev directory. Delete and create if it exists
 const buildSequence = new Promise ((resolve, reject) => {
-  if (!fs.existsSync(buildDevDir)) {
-    fs.mkdirSync(buildDevDir)
-  } else {
-    fs.removeSync(buildDevDir)
-    fs.mkdirSync(buildDevDir)
-  }
+  !fs.existsSync(buildDevDir) ? fs.mkdirSync(buildDevDir) : ( fs.removeSync(buildDevDir), fs.mkdirSync(buildDevDir) )
 })
   .then(fs.copy('./public', './build-dev')) // 2. copy index.html, favicon.ico, manifest.json from ../public/ to build-dev/
   .then(() => {
