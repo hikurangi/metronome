@@ -5,6 +5,9 @@ import styles from './css/styles.css'
 import clickWav from './audio/click.wav'
 import index from '../index.html'
 
+import { app } from './js/domSetup'
+console.log({app}); // make sure the destructuring is working
+
 // const clickSound = document.querySelector('.click')
 const clickSound = new Audio(clickWav)
 const onSwitch = document.querySelector('#onswitch')
