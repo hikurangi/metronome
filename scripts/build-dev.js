@@ -21,8 +21,12 @@ const buildSequence = new Promise ((resolve, reject) => {
     fs.mkdirSync(buildDevDir)
   }
 })
-  .then(() => { // 2. copy index.html, favicon.ico, manifest.json from ../public/ to build-dev/
-    fs.copy('/public/', '/build-dev/public/')
+  .then(fs.copy('./public', './build-dev')) // 2. copy index.html, favicon.ico, manifest.json from ../public/ to build-dev/
+  .then(() => {
+    console.log('success!');
+  })
+  .catch(err => {
+    console.log({err});
   })
 
 // fs.createReadStream('test.log').pipe(fs.createWriteStream('newLog.log'));
