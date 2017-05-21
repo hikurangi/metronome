@@ -1,15 +1,17 @@
 "use strict"
 
 // Webpack imports
-import styles from './css/styles.css'
-import clickWav from './audio/click.wav'
+import styles from './css/index.css'
 import index from '../index.html'
+import clickWav from './audio/click.wav' // clickWav, click, clickSound very confusing
+
+
 
 import { app } from './js/domSetup'
 console.log({app}); // make sure the destructuring is working
 
 import click from './js/click'
-import state rom './js/state'
+import state from './js/state'
 // const clickSound = document.querySelector('.click')
 const clickSound = new Audio(clickWav)
 const onSwitch = document.querySelector('#onswitch')

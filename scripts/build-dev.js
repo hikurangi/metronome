@@ -3,15 +3,6 @@ const path = require('path')
 
 const buildDevDir = 'build-dev'
 
-// Not sure how to get the fall-through to work with the switch
-// switch(fs.existsSync(buildDevDir)) {
-//   case true:
-//     fs.remove(buildDevDir)
-//   default:
-//     fs.mkdirSync(buildDevDir)
-// }
-
-
 // 1. Create the build-dev directory. Delete and create if it exists
 const buildSequence = new Promise ((resolve, reject) => {
   !fs.existsSync(buildDevDir) ? fs.mkdirSync(buildDevDir) : ( fs.removeSync(buildDevDir), fs.mkdirSync(buildDevDir) )
