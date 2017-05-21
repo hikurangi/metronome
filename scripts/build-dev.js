@@ -1,16 +1,30 @@
 const fs = require('fs-extra')
 const path = require('path')
 
-const buildDevDir = './build-dev'
+const buildDevDir = 'build-dev'
+
+// Not sure how to get the fall-through to work with the switch
+// switch(fs.existsSync(buildDevDir)) {
+//   case true:
+//     fs.remove(buildDevDir)
+//   default:
+//     fs.mkdirSync(buildDevDir)
+// }
+
 
 // 1. Create the build-dev directory. Delete and create if it exists
-if (!fs.existsSync(buildDevDir)) {
-  fs.mkdirSync(buildDevDir)
-} else {
-  fs.remove(buildDevDir)
-  fs.mkdirSync(buildDevDir)
-}
+const buildSequence = new Promise ((resolve, reject) => {
+  if (!fs.existsSync(buildDevDir)) {
+    fs.mkdirSync(buildDevDir)
+  } else {
+    fs.removeSync(buildDevDir)
+    fs.mkdirSync(buildDevDir)
+  }
+})
+  .then(() => { // 2. copy index.html, favicon.ico, manifest.json from ../public/ to build-dev/
+    fs.copy('/public/', '/build-dev/public/')
+  })
 
-// 2. copy index.html, favicon.ico, manifest.json from ../public/ to build-dev/
+// fs.createReadStream('test.log').pipe(fs.createWriteStream('newLog.log'));
 
-// 3.
+// 3/2.5 change %PUBLIC_URL% in links to appropriate url in moved index.html
