@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "a javascript metronome with handy tools to work on groove and time feel",
   "main": "app/index.js",
-  "dependencies": {},
+  "dependencies": {
+    "dotenv": "^4.0.0"
+  },
   "devDependencies": {
     "ava": "^0.19.1",
     "css-loader": "^0.28.1",

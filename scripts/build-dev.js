@@ -1,5 +1,6 @@
 const fs = require('fs-extra')
 const path = require('path')
+require('dotenv').config() // *may* be needed elsewhere
 
 const buildDevDir = 'build-dev'
 
@@ -10,7 +11,7 @@ const pathFix = () => {
   // use __dirname and path.resolve to find index.html and bundle.js <---   // 1. move index
   // 2. trigger webpack (not dev server?) to move the file to the build folder
   // 3. after that's been done, do a path.resolve to find relative path from index.html to bundle.js and replace %PUBLIC_URL% with that path
-  // 
+  //
 }
 
 // 1. Create the build-dev directory. Delete and create if it exists
