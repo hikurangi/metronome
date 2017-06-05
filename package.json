@@ -4,7 +4,8 @@
   "description": "a javascript metronome with handy tools to work on groove and time feel",
   "main": "app/index.js",
   "dependencies": {
-    "dotenv": "^4.0.0"
+    "dotenv": "^4.0.0",
+    "jsdom": "^11.0.0"
   },
   "devDependencies": {
     "ava": "^0.19.1",
@@ -17,7 +18,7 @@
     "webpack": "^2.5.1"
   },
   "scripts": {
-    "start-dev": "npm run build-dev && webpack-dev-server --open config/webpack.dev.js",
+    "start-dev": "yarn run build-dev && webpack-dev-server --open config/webpack.dev.js",
     "start": "webpack --config webpack.config.js",
     "build-dev": "node scripts/build-dev.js",
     "test": "test && ava"
