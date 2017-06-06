@@ -8,7 +8,10 @@ const buildDevDir = 'build-dev' // could abstract many of these things into .env
 const pathFix = () => {
   console.log('this is where index.html gets pointed to the correct url');
   console.log('process.env.NODE_ENV', process.env.NODE_ENV);
-  let index = '../build-dev/index.html'
+  fs.readFile('../build-dev/index.html', (err, data) => {
+    if (err) throw err
+    console.log({data});
+  })
   // use __dirname and path.resolve to find index.html and bundle.js <---   // 1. move index
   // 2. trigger webpack (not dev server?) to move the file to the build folder
   // 3. after that's been done, do a path.resolve to find relative path from index.html to bundle.js and replace %PUBLIC_URL% with that path
@@ -19,8 +22,7 @@ const pathFix = () => {
 const buildSequence = new Promise ((resolve, reject) => {
   !fs.existsSync(buildDevDir) ? fs.mkdirSync(buildDevDir) : ( fs.removeSync(buildDevDir), fs.mkdirSync(buildDevDir) )
 }) // must happen before files are copied to it.
-  .then(fs.copy('./public', './build-dev')) // 2. copy index.html, favicon.ico, manifest.json from ../public/ to build-dev/
-  .then(pathFix()) // 3. see at function definition
+  .then(fs.copy('./public', './build-dev').then(pathFix())) // 2. copy index.html, favicon.ico, manifest.json from ../public/ to build-dev/
   .then(() => {
     console.log('success!');
   })
