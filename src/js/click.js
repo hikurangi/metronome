@@ -1,4 +1,4 @@
-import state from './state'
+const state = require('./state')
 
 // The Click - actually plays the click sound
 const click = () => {

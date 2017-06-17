@@ -23,15 +23,11 @@ onSwitch.addEventListener('click', function() {
 
 let clickInterval // create an ID for setInterval and clearInterval to dynamically change
 const switcher = () => {
-  if (state.switched.on) {
-    clickInterval = setInterval(click, state.ms)
-  } else {
-    clearInterval(clickInterval)
-    state.currentBeat = 1
-  }
+  state.switched.on ? clickInterval = setInterval(click, state.ms) : ( clearInterval(clickInterval),
+    state.currentBeat = 1)
 }
 
-const bpmInput = document.querySelector('#number-input')
+let bpmInput = document.querySelector('#number-input')
 bpmInput.addEventListener('input', function(e) {
   state.inputBPM = e.target.value // after changing these settings and turning the metch on + off again, the first two beats of each bar play, but not subsequent beats.
   loader()
@@ -49,13 +45,13 @@ clickSound.addEventListener("loadeddata", () => {
 })
 
 // loadLimit calculates how many sounds to add to state.clickArray
-const loadLimit = () => {
+let loadLimit = () => {
   console.log('loadLimit', Math.ceil(1000 * clickSound.duration / state.ms));
   return Math.ceil(1000 * clickSound.duration / state.ms)
 }
 
 // Sound loader - function to be invoked after loadLimit changes
-const loader = () => {
+let loader = () => {
   console.log({state});
   loadLimit()
   for (let i = 0; i < loadLimit; i++) { // loop which will push cloned sounds to a storage array

@@ -1,7 +1,7 @@
 const path = require('path')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 
-const config = {
+let config = {
   entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, '../dist'),

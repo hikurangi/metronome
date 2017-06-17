@@ -19,7 +19,7 @@
   },
   "scripts": {
     "start": "yarn build",
-    "build": "webpack --config config/webpack.config.js",
+    "build": "webpack --watch --config config/webpack.config.js",
     "test": "test && ava"
   },
   "repository": "git+https://github.com/hikurangi/metronome.git",
