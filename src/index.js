@@ -2,12 +2,9 @@
 
 // Webpack imports
 import styles from './css/index.css'
-import index from '../index.html'
 import clickWav from './audio/click.wav' // clickWav, click, clickSound very confusing
 
-
-
-import { app } from './js/domSetup'
+import { app } from './js/dom-setup'
 console.log({app}); // make sure the destructuring is working
 
 import click from './js/click'
