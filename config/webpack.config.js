@@ -1,25 +1,36 @@
 const path = require('path')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
-let config = {
-  entry: './src/index.js',
+const config = {
+  entry: './src/app.js',
   output: {
     path: path.resolve(__dirname, '../dist'),
     filename: 'bundle.js'
   },
+  devtool: 'source-map',
   module: {
-    rules: [
-      { test: /\.css$/, use: ExtractTextPlugin.extract({ use: 'css-loader'}) },
-      { test: /\.wav$/, use: 'file-loader' }, // must go to static/audio
-      { test: /\.html$/, use: 'html-loader' } // base build folder
+    loaders: [
+      {
+        test: /\.css$/,
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          use: 'css-loader'
+        })
+      },
+      {
+        test: /\.(wav|ico)$/, // will this work for favicon?
+        use: 'file-loader'
+      }
     ]
   },
   plugins: [
-    new ExtractTextPlugin('styles.css')
-  ],
-  // node: {
-  //   fs: 'empty'
-  // }
+    new ExtractTextPlugin('styles.css'),
+    new HtmlWebpackPlugin({
+      title: 'Custom Template',
+      template: './public/index.html'
+    })
+  ]
 }
 
 module.exports = config

@@ -1,7 +1,5 @@
 "use strict"
 
-// Webpack imports
-import styles from './css/index.css'
 import clickWav from './audio/click.wav' // clickWav, click, clickSound very confusing
 
 import { app } from './js/dom-setup'
