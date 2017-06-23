@@ -19,7 +19,7 @@ const config = {
         })
       },
       {
-        test: /\.(wav|ico)$/, // will this work for favicon?
+        test: /\.(wav|ico)$/,
         use: 'file-loader'
       }
     ]
