@@ -4,7 +4,8 @@
   "description": "a javascript metronome with handy tools to work on groove and time feel",
   "main": "app/index.js",
   "dependencies": {
-    "dotenv": "^4.0.0"
+    "dotenv": "^4.0.0",
+    "git-scripts": "^0.2.1"
   },
   "devDependencies": {
     "ava": "^0.19.1",
@@ -19,6 +20,11 @@
     "start": "yarn build",
     "build": "webpack --progress --colors --watch --config config/webpack.config.js",
     "test": "test && ava"
+  },
+  "git": {
+    "scripts": {
+      "pre-push": "surge --project ./dist --domain metch-js.surge.sh"
+    }
   },
   "repository": "git+https://github.com/hikurangi/metronome.git",
   "keywords": [
