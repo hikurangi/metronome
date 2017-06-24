@@ -10,7 +10,7 @@ const config = {
   },
   devtool: 'source-map',
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.css$/,
         use: ExtractTextPlugin.extract({
@@ -21,6 +21,11 @@ const config = {
       {
         test: /\.(wav|ico)$/,
         use: 'file-loader'
+      },
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: 'babel-loader'
       }
     ]
   },
