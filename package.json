@@ -4,16 +4,17 @@
   "description": "a javascript metronome with handy tools to work on groove and time feel",
   "main": "app/index.js",
   "dependencies": {
-    "dotenv": "^4.0.0",
-    "git-scripts": "^0.2.1"
+    "dotenv": "^4.0.0"
   },
   "devDependencies": {
     "ava": "^0.19.1",
     "css-loader": "^0.28.1",
     "extract-text-webpack-plugin": "^2.1.0",
     "file-loader": "^0.11.1",
+    "git-scripts": "^0.2.1",
     "html-webpack-plugin": "^2.28.0",
     "style-loader": "^0.17.0",
+    "surge": "^0.19.0",
     "webpack": "^2.5.1"
   },
   "scripts": {
