@@ -2,9 +2,7 @@
 let loader = (state, loadLimit, clickSound) => {
   console.log({stateInLoader: state});
 
-  let limit = 0
-
-  typeof loadlimit === 'function' ? limit = loadLimit(state, clickSound) : limit = loadLimit
+  let limit = typeof loadlimit === 'function' ? loadLimit(state, clickSound) : loadLimit
   for (let i = 0; i < loadLimit; i++) { // loop which will push cloned sounds to a storage array
     // adding other subdivision/clicks will add a lot of complexity
     if ( state.clickArr.length > limit ) { // if the array of stored clicks is bigger than the necessary click limit
