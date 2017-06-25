@@ -1,7 +1,5 @@
-const state = require('./state')
-
 // The Click - actually plays the click sound
-const click = () => {
+const click = state => {
   // log which beat we're at. this should be delayed by a quarter of the clickSound.duration so that it pops right about where the click itself is.
   console.log(`Beat #${state.currentBeat}`)
   // setTimeout(() => {}, clickSound.duration * 1000 / 4 ) // * 1000 miliseconds / 4 25% thru
@@ -15,4 +13,4 @@ const click = () => {
   state.arrPosition < state.clickArr.length - 1 ? state.arrPosition++ : state.arrPosition = 0
 }
 
-module.exports = click
+export default click
