@@ -12,24 +12,21 @@ import click from './js/click'
 import state from './js/state'
 import loader from './js/loader'
 import loadLimit from './js/loadLimit'
+import switcher from './js/switcher'
 
 // const clickSound = document.querySelector('.click')
 const clickSound = new Audio(clickWav)
 const onSwitch = document.querySelector('#onswitch')
 // when the button is if the click is set to on in the state, start the click for an interval set by state.ms.
 
+let clickInterval // create an ID for setInterval and clearInterval to dynamically change
+
 // abstracted but very readable imo
 onSwitch.addEventListener('click', function() {
   state.switched.on = !state.switched.on
   this.innerHTML = state.switched.text
-  switcher()
+  switcher(state, click, clickInterval)
 })
-
-let clickInterval // create an ID for setInterval and clearInterval to dynamically change
-const switcher = () => {
-  state.switched.on ? clickInterval = setInterval(click, state.ms) : ( clearInterval(clickInterval),
-    state.currentBeat = 1)
-}
 
 let bpmInput = document.querySelector('#number-input')
 bpmInput.addEventListener('input', function(e) {
