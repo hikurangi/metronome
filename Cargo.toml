@@ -1,0 +1,8 @@
+[package]
+name = "metronome"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rodio = "0.19"
+spin_sleep = "1.2"
