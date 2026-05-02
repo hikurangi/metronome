@@ -1,5 +1,11 @@
 use crate::sound::beat::Beat;
-use std::time::{Duration, Instant};
+use std::{
+    sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering},
+    },
+    time::{Duration, Instant},
+};
 
 pub struct EngineState {
     pub bpm: u64,
@@ -24,11 +30,11 @@ impl EngineState {
 }
 
 // `on_tick` will become an Output trait — audio, haptic, MIDI, WAV render, etc.
-pub fn run(state: &mut EngineState, on_tick: impl Fn(&Beat)) {
+pub fn run(state: &mut EngineState, running: Arc<AtomicBool>, on_tick: impl Fn(&Beat)) {
     let interval = Duration::from_nanos(60_000_000_000 / state.bpm);
     let mut next_tick = Instant::now();
 
-    loop {
+    while running.load(Ordering::Relaxed) {
         let now = Instant::now();
         if now < next_tick {
             spin_sleep::sleep(next_tick - now);

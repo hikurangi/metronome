@@ -1,3 +1,6 @@
+use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
+
 use rodio::OutputStream;
 use rodio::buffer::SamplesBuffer;
 use rodio::cpal::traits::{DeviceTrait, HostTrait};
@@ -42,12 +45,19 @@ fn main() {
     let mut state = EngineState::new(BPM, pattern);
 
     let bank = SoundBank::new(sample_rate);
+    let running = Arc::new(AtomicBool::new(true));
+    let r = Arc::clone(&running);
 
-    run(&mut state, |beat| {
-        if let Some(buf) = bank.get(beat) {
-            stream_handle
-                .play_raw(SamplesBuffer::new(1, sample_rate, buf.to_vec()))
-                .unwrap();
-        }
+    std::thread::spawn(move || {
+        run(&mut state, r, |beat| {
+            if let Some(buf) = bank.get(beat) {
+                stream_handle
+                    .play_raw(SamplesBuffer::new(1, sample_rate, buf.to_vec()))
+                    .unwrap();
+            }
+        });
     });
+
+    // main thread free for UI — for now just park it
+    std::thread::park();
 }
