@@ -1,7 +1,7 @@
 use rodio::Source;
 use std::{f32::consts::TAU, time::Duration};
 
-use crate::DEFAULT_SAMPLE_RATE;
+use crate::constants::DEFAULT_SAMPLE_RATE;
 
 const CLICK_ACCENT_FREQ_HZ: f32 = 1320.0;
 const CLICK_NORMAL_FREQ_HZ: f32 = 880.0;
@@ -27,15 +27,16 @@ impl Default for ClickConfig {
 }
 
 impl ClickConfig {
-    pub fn normal() -> Self {
+    pub fn normal(sample_rate: u32) -> Self {
         Self {
-            freq_hz: CLICK_NORMAL_FREQ_HZ,
+            sample_rate,
             ..Self::default()
         }
     }
-    pub fn accent() -> Self {
+    pub fn accent(sample_rate: u32) -> Self {
         Self {
             freq_hz: CLICK_ACCENT_FREQ_HZ,
+            sample_rate,
             ..Self::default()
         }
     }

@@ -1,6 +1,5 @@
+use crate::sound::beat::Beat;
 use std::time::{Duration, Instant};
-
-use crate::sound::bank::Beat;
 
 pub struct EngineState {
     pub bpm: u64,

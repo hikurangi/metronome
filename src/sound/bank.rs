@@ -1,11 +1,7 @@
-use crate::sound::click::{ClickConfig, render};
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum Beat {
-    Accent,
-    Normal,
-    Silent,
-}
+use crate::sound::{
+    beat::Beat,
+    click::{ClickConfig, render},
+};
 
 pub struct SoundBank {
     accent: Vec<f32>,
@@ -13,10 +9,12 @@ pub struct SoundBank {
 }
 
 impl SoundBank {
-    pub fn new() -> Self {
+    // not super convinced about this method
+    // of passing a sample rate down at runtime
+    pub fn new(sample_rate: u32) -> Self {
         Self {
-            normal: render(ClickConfig::normal()),
-            accent: render(ClickConfig::accent()),
+            normal: render(ClickConfig::normal(sample_rate)),
+            accent: render(ClickConfig::accent(sample_rate)),
         }
     }
 

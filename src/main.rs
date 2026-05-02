@@ -2,16 +2,18 @@ use rodio::OutputStream;
 use rodio::buffer::SamplesBuffer;
 use rodio::cpal::traits::{DeviceTrait, HostTrait};
 
+mod constants;
 mod engine;
 mod sound;
 
+use crate::constants::DEFAULT_SAMPLE_RATE;
 use crate::engine::{EngineState, run};
-use crate::sound::bank::{Beat, SoundBank};
+use crate::sound::bank::SoundBank;
+use crate::sound::beat::Beat;
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
 const BPM: u64 = 120;
-const DEFAULT_SAMPLE_RATE: u32 = 44_100;
 
 fn device_sample_rate() -> u32 {
     rodio::cpal::default_host()
@@ -39,7 +41,7 @@ fn main() {
     ];
     let mut state = EngineState::new(BPM, pattern);
 
-    let bank = SoundBank::new();
+    let bank = SoundBank::new(sample_rate);
 
     run(&mut state, |beat| {
         if let Some(buf) = bank.get(beat) {
