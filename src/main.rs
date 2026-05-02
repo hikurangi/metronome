@@ -1,13 +1,13 @@
-use std::time::{Duration, Instant};
-
 use rodio::OutputStream;
 use rodio::buffer::SamplesBuffer;
 use rodio::cpal::traits::{DeviceTrait, HostTrait};
 
+mod engine;
+mod sound;
+
+use crate::engine::run;
 use crate::sound::click::{ClickSource, ClickSourceConfig};
 
-mod sound;
-// use audio::click::ClickSource;
 // ── Config ────────────────────────────────────────────────────────────────────
 
 const BPM: u64 = 120;
@@ -22,24 +22,6 @@ fn device_sample_rate() -> u32 {
         .and_then(|d| d.default_output_config().ok())
         .map(|c| c.sample_rate().0)
         .unwrap_or(DEFAULT_SAMPLE_RATE)
-}
-
-// ── Engine ──────────────────────────────────────────────────── future: src/engine.rs
-//
-// `on_tick` will become an Output trait — audio, haptic, MIDI, WAV render, etc.
-
-fn run(bpm: u64, on_tick: impl Fn()) {
-    let interval = Duration::from_nanos(60_000_000_000 / bpm);
-    let mut next_tick = Instant::now();
-
-    loop {
-        let now = Instant::now();
-        if now < next_tick {
-            spin_sleep::sleep(next_tick - now);
-        }
-        on_tick();
-        next_tick += interval; // fixed advance — never drifts
-    }
 }
 
 // ── Pre-render click to buffer ──────────────────────────────────────────────
