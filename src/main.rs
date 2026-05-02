@@ -60,7 +60,7 @@ fn main() {
     let (_stream, stream_handle) = OutputStream::try_default().expect("no audio output");
     let click_buffer = render_click(click_source_config);
 
-    println!("♩ {BPM} BPM — with click sample rate: {sample_rate}Hz");
+    println!("♩ {BPM} BPM — with click sample rate of: {sample_rate} Hz");
 
     run(BPM, move || {
         let buf = SamplesBuffer::new(1, sample_rate, click_buffer.clone());
