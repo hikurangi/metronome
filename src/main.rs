@@ -5,6 +5,8 @@ use rodio::OutputStream;
 use rodio::buffer::SamplesBuffer;
 use rodio::cpal::traits::{DeviceTrait, HostTrait};
 
+use dioxus::prelude::*;
+
 mod constants;
 mod engine;
 mod sound;
@@ -58,6 +60,12 @@ fn main() {
         });
     });
 
-    // main thread free for UI — for now just park it
-    std::thread::park();
+    dioxus::launch(App);
+}
+
+#[component]
+fn App() -> Element {
+    rsx! {
+        div { "♩ metronome" }
+    }
 }
