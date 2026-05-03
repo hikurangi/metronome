@@ -1,16 +1,22 @@
-use crate::context::BPM_DEFAULT;
-use std::sync::atomic::{AtomicBool, AtomicU64};
+use crate::constants::BPM_DEFAULT;
+use crate::sound::beat::Beat;
+use std::sync::{
+    Arc, RwLock,
+    atomic::{AtomicBool, AtomicU64},
+};
 
 pub struct EngineHandle {
     pub bpm: AtomicU64,
-    pub is_running: AtomicBool,
+    pub running: AtomicBool,
+    pub pattern: Arc<RwLock<Vec<Beat>>>,
 }
 
 impl EngineHandle {
-    pub fn new() -> Self {
+    pub fn new(pattern: Arc<RwLock<Vec<Beat>>>) -> Self {
         Self {
             bpm: AtomicU64::new(BPM_DEFAULT),
-            is_running: AtomicBool::new(false),
+            running: AtomicBool::new(false),
+            pattern,
         }
     }
 }
