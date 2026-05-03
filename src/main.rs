@@ -1,20 +1,20 @@
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
-use rodio::OutputStream;
 use rodio::buffer::SamplesBuffer;
 use rodio::cpal::traits::{DeviceTrait, HostTrait};
-
-use dioxus::prelude::*;
+use rodio::{OutputStream, Sink};
 
 mod constants;
 mod engine;
 mod sound;
+mod ui;
 
 use crate::constants::DEFAULT_SAMPLE_RATE;
 use crate::engine::{EngineState, run};
 use crate::sound::bank::SoundBank;
 use crate::sound::beat::Beat;
+use crate::ui::App;
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -29,7 +29,6 @@ fn device_sample_rate() -> u32 {
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
-
 fn main() {
     let sample_rate = device_sample_rate();
 
@@ -47,25 +46,28 @@ fn main() {
     let mut state = EngineState::new(BPM, pattern);
 
     let bank = SoundBank::new(sample_rate);
-    let running = Arc::new(AtomicBool::new(true));
-    let r = Arc::clone(&running);
+    let is_running = Arc::new(AtomicBool::new(false));
+    let r = Arc::clone(&is_running);
+
+    let sink = Arc::new(Sink::try_new(&stream_handle).unwrap());
+    let sink_tick = Arc::clone(&sink);
+    let sink_stop = Arc::clone(&sink);
 
     std::thread::spawn(move || {
-        run(&mut state, r, |beat| {
-            if let Some(buf) = bank.get(beat) {
-                stream_handle
-                    .play_raw(SamplesBuffer::new(1, sample_rate, buf.to_vec()))
-                    .unwrap();
-            }
-        });
+        run(
+            &mut state,
+            r,
+            |beat| {
+                if let Some(buf) = bank.get(beat) {
+                    sink_tick.append(SamplesBuffer::new(1, sample_rate, buf.to_vec()));
+                    sink_tick.play();
+                }
+            },
+            || sink_stop.clear(),
+        );
     });
 
-    dioxus::launch(App);
-}
-
-#[component]
-fn App() -> Element {
-    rsx! {
-        div { "♩ metronome" }
-    }
+    dioxus::LaunchBuilder::new()
+        .with_context(is_running)
+        .launch(App);
 }
