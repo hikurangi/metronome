@@ -1,25 +1,41 @@
-use dioxus::prelude::*;
-use std::sync::{
-    Arc,
-    atomic::{AtomicBool, Ordering},
+use crate::{
+    context::{AppContext, BPM_MAX, BPM_MIN},
+    engine::handle::EngineHandle,
 };
+use dioxus::prelude::*;
+use std::sync::{Arc, atomic::Ordering};
 
-// ui.rs
 #[component]
 pub fn App() -> Element {
-    let running = use_context::<Arc<AtomicBool>>();
-    let mut is_running = use_signal(|| false);
+    let mut ctx = use_signal(AppContext::new);
+    let handle = use_context::<Arc<EngineHandle>>();
+    let handle_bpm = Arc::clone(&handle);
+    let handle_running = Arc::clone(&handle);
 
     rsx! {
         div {
-            p { "♩ 120 BPM" }
+            p { "♩ {ctx.read().bpm} BPM" }
+
+            input {
+                r#type: "range",
+                min: BPM_MIN as f64,
+                max: BPM_MAX as f64,
+                value: ctx.read().bpm,
+                oninput: move |e| {
+                    if let Ok(val) = e.value().parse::<u64>() {
+                        ctx.write().bpm = val;
+                        handle_bpm.bpm.store(val, Ordering::Relaxed);
+                    }
+                }
+            }
+
             button {
                 onclick: move |_| {
-                    let next = !is_running();
-                    is_running.set(next);
-                    running.store(next, Ordering::Relaxed);
+                    let next = !ctx.read().is_running;
+                    ctx.write().is_running = next;
+                    handle_running.is_running.store(next, Ordering::Relaxed);
                 },
-                if is_running() { "Stop" } else { "Start" }
+                if ctx.read().is_running { "Stop" } else { "Start" }
             }
         }
     }

@@ -1,24 +1,22 @@
-use std::sync::Arc;
-use std::sync::atomic::AtomicBool;
-
+use dioxus::signals::{Signal, SyncStorage};
 use rodio::buffer::SamplesBuffer;
 use rodio::cpal::traits::{DeviceTrait, HostTrait};
 use rodio::{OutputStream, Sink};
+use std::sync::Arc;
 
 mod constants;
+mod context;
 mod engine;
 mod sound;
 mod ui;
 
 use crate::constants::DEFAULT_SAMPLE_RATE;
-use crate::engine::{EngineState, run};
+use crate::context::AppContext;
+use crate::engine::handle::EngineHandle;
+use crate::engine::state::{EngineState, run};
 use crate::sound::bank::SoundBank;
 use crate::sound::beat::Beat;
 use crate::ui::App;
-
-// ── Config ────────────────────────────────────────────────────────────────────
-
-const BPM: u64 = 120;
 
 fn device_sample_rate() -> u32 {
     rodio::cpal::default_host()
@@ -28,26 +26,17 @@ fn device_sample_rate() -> u32 {
         .unwrap_or(DEFAULT_SAMPLE_RATE)
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────────
 fn main() {
     let sample_rate = device_sample_rate();
-
     let (_stream, stream_handle) = OutputStream::try_default().expect("no audio output");
 
-    println!("♩ {BPM} BPM — with click sample rate of: {sample_rate} Hz");
+    let pattern = vec![Beat::Accent, Beat::Normal, Beat::Normal, Beat::Normal];
 
-    let pattern = vec![
-        Beat::Accent,
-        Beat::Normal,
-        Beat::Normal,
-        Beat::Normal,
-        Beat::Silent,
-    ];
-    let mut state = EngineState::new(BPM, pattern);
-
+    let mut state = EngineState::new(pattern);
     let bank = SoundBank::new(sample_rate);
-    let is_running = Arc::new(AtomicBool::new(false));
-    let r = Arc::clone(&is_running);
+
+    let handle = Arc::new(EngineHandle::new());
+    let handle_engine = Arc::clone(&handle);
 
     let sink = Arc::new(Sink::try_new(&stream_handle).unwrap());
     let sink_tick = Arc::clone(&sink);
@@ -56,7 +45,7 @@ fn main() {
     std::thread::spawn(move || {
         run(
             &mut state,
-            r,
+            handle_engine,
             |beat| {
                 if let Some(buf) = bank.get(beat) {
                     sink_tick.append(SamplesBuffer::new(1, sample_rate, buf.to_vec()));
@@ -68,6 +57,6 @@ fn main() {
     });
 
     dioxus::LaunchBuilder::new()
-        .with_context(is_running)
+        .with_context(handle)
         .launch(App);
 }
