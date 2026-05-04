@@ -121,7 +121,8 @@ body {
     align-items: center;
     gap: 0.8rem;
     width: 100%;
-    max-width: 340px;
+    max-width: 680px;
+    padding: 0 1.5rem;
 }
 
 input[type="range"] {
@@ -456,6 +457,7 @@ input[type="range"]::-moz-range-thumb {
     animation: c-lo-b 0.25s ease-out forwards;
 }
 
+/*
 /* ── Ring wrap ─────────────────────────────────────────────── */
 .ring-wrap {
     position: relative;
@@ -497,45 +499,6 @@ input[type="range"]::-moz-range-thumb {
     stroke-dashoffset: 82;
 }
 
-@keyframes sweep-even {
-    from {
-        stroke-dashoffset: 0;
-    }
-
-    to {
-        stroke-dashoffset: 188;
-    }
-}
-
-@keyframes sweep-odd {
-    from {
-        stroke-dashoffset: 0;
-    }
-
-    to {
-        stroke-dashoffset: 188;
-    }
-}
-
-@keyframes sweep-sub-even {
-    from {
-        stroke-dashoffset: 0;
-    }
-
-    to {
-        stroke-dashoffset: 82;
-    }
-}
-
-@keyframes sweep-sub-odd {
-    from {
-        stroke-dashoffset: 0;
-    }
-
-    to {
-        stroke-dashoffset: 82;
-    }
-}
 
 .sweep.even .sweep-fill {
     animation: sweep-even linear forwards;
