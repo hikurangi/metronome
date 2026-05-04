@@ -1,0 +1,454 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400&display=swap');
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── Themes ──────────────────────────────────────────────────────────────── */
+:root {
+    --bg: #0a0a0a;
+    --fg: #ede8e0;
+    --dim: #1a1a1a;
+    --border: #2d2d2d;
+    --mid: #555;
+    --glow: rgba(237, 232, 224, 0.22);
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --bg: #f2efe8;
+        --fg: #111;
+        --dim: #e2dfd8;
+        --border: #ccc;
+        --mid: #999;
+        --glow: rgba(0, 0, 0, 0.12);
+    }
+}
+
+.app.dark {
+    --bg: #0a0a0a;
+    --fg: #ede8e0;
+    --dim: #1a1a1a;
+    --border: #2d2d2d;
+    --mid: #555;
+    --glow: rgba(237, 232, 224, 0.22);
+}
+
+.app.light {
+    --bg: #f2efe8;
+    --fg: #111;
+    --dim: #e2dfd8;
+    --border: #ccc;
+    --mid: #999;
+    --glow: rgba(0, 0, 0, 0.12);
+}
+
+body {
+    background: var(--bg);
+}
+
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+.app {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    gap: 2.2rem;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'DM Mono', monospace;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: background 0.3s, color 0.3s;
+}
+
+/* ── Theme toggle ────────────────────────────────────────────────────────── */
+.theme-btn {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--mid);
+    font-size: 1rem;
+    width: 2.4rem;
+    height: 2.4rem;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.theme-btn:hover {
+    border-color: var(--fg);
+    color: var(--fg);
+}
+
+/* ── BPM ─────────────────────────────────────────────────────────────────── */
+.bpm-row {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.bpm-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 10rem;
+    line-height: 0.9;
+    letter-spacing: -0.01em;
+    min-width: 4ch;
+    text-align: center;
+    color: var(--fg);
+    text-shadow: none;
+    transition: text-shadow 0.3s ease-out;
+}
+
+.bpm-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.5em;
+    color: var(--mid);
+    text-transform: uppercase;
+    margin-top: -2rem;
+}
+
+/* ── BPM flash animations ────────────────────────────────────────────────── */
+@keyframes bpm-hi-a {
+    from {
+        text-shadow: 0 0 50px var(--fg), 0 0 80px var(--glow);
+    }
+
+    to {
+        text-shadow: none;
+    }
+}
+
+@keyframes bpm-hi-b {
+    from {
+        text-shadow: 0 0 50px var(--fg), 0 0 80px var(--glow);
+    }
+
+    to {
+        text-shadow: none;
+    }
+}
+
+@keyframes bpm-mid-a {
+    from {
+        text-shadow: 0 0 30px var(--fg), 0 0 50px var(--glow);
+    }
+
+    to {
+        text-shadow: none;
+    }
+}
+
+@keyframes bpm-mid-b {
+    from {
+        text-shadow: 0 0 30px var(--fg), 0 0 50px var(--glow);
+    }
+
+    to {
+        text-shadow: none;
+    }
+}
+
+@keyframes bpm-lo-a {
+    from {
+        text-shadow: 0 0 14px var(--glow);
+    }
+
+    to {
+        text-shadow: none;
+    }
+}
+
+@keyframes bpm-lo-b {
+    from {
+        text-shadow: 0 0 14px var(--glow);
+    }
+
+    to {
+        text-shadow: none;
+    }
+}
+
+.bpm-number.flash-hi-a {
+    animation: bpm-hi-a 0.35s ease-out forwards;
+}
+
+.bpm-number.flash-hi-b {
+    animation: bpm-hi-b 0.35s ease-out forwards;
+}
+
+.bpm-number.flash-mid-a {
+    animation: bpm-mid-a 0.35s ease-out forwards;
+}
+
+.bpm-number.flash-mid-b {
+    animation: bpm-mid-b 0.35s ease-out forwards;
+}
+
+.bpm-number.flash-lo-a {
+    animation: bpm-lo-a 0.25s ease-out forwards;
+}
+
+.bpm-number.flash-lo-b {
+    animation: bpm-lo-b 0.25s ease-out forwards;
+}
+
+/* ── Adj buttons ─────────────────────────────────────────────────────────── */
+.adj {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--fg);
+    font-family: 'DM Mono', monospace;
+    font-size: 1.4rem;
+    width: 3rem;
+    height: 3rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: border-color 0.1s;
+    line-height: 1;
+}
+
+.adj:hover {
+    border-color: var(--fg);
+}
+
+.adj:active {
+    background: var(--fg);
+    color: var(--bg);
+}
+
+.adj.sm {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1rem;
+}
+
+/* ── Beat area ───────────────────────────────────────────────────────────── */
+.beat-area {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    max-width: 680px;
+    padding: 0 1.5rem;
+}
+
+.beat-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    flex: 1;
+}
+
+.beat-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    justify-content: center;
+}
+
+.sub-row {
+    display: flex;
+    gap: 0.8rem;
+    justify-content: center;
+}
+
+/* ── Beat circles ────────────────────────────────────────────────────────── */
+.beat,
+.sub {
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    transition: box-shadow 0.3s ease-out, transform 0.08s;
+}
+
+.beat {
+    width: 3.6rem;
+    height: 3.6rem;
+}
+
+.sub {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.beat.accent {
+    background: var(--fg);
+}
+
+.beat.normal {
+    background: var(--dim);
+    box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.beat.silent {
+    background: transparent;
+    box-shadow: inset 0 0 0 2px var(--fg);
+}
+
+.sub.accent {
+    background: var(--fg);
+}
+
+.sub.normal {
+    background: var(--dim);
+    box-shadow: inset 0 0 0 1px var(--border);
+
+}
+
+.sub.silent {
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--fg);
+}
+
+.beat:active,
+.sub:active {
+    transform: scale(0.88);
+}
+
+/* ── Circle flash animations ─────────────────────────────────────────────── */
+@keyframes c-hi-a {
+    from {
+        box-shadow: 0 0 0 4px var(--fg), 0 0 32px 12px var(--glow);
+    }
+
+    to {
+        box-shadow: none;
+    }
+}
+
+@keyframes c-hi-b {
+    from {
+        box-shadow: 0 0 0 4px var(--fg), 0 0 32px 12px var(--glow);
+    }
+
+    to {
+        box-shadow: none;
+    }
+}
+
+@keyframes c-mid-a {
+    from {
+        box-shadow: 0 0 0 3px var(--fg), 0 0 20px 7px var(--glow);
+    }
+
+    to {
+        box-shadow: none;
+    }
+}
+
+@keyframes c-mid-b {
+    from {
+        box-shadow: 0 0 0 3px var(--fg), 0 0 20px 7px var(--glow);
+    }
+
+    to {
+        box-shadow: none;
+    }
+}
+
+@keyframes c-lo-a {
+    from {
+        box-shadow: 0 0 0 1px var(--fg), 0 0 10px 3px var(--glow);
+    }
+
+    to {
+        box-shadow: none;
+    }
+}
+
+@keyframes c-lo-b {
+    from {
+        box-shadow: 0 0 0 1px var(--fg), 0 0 10px 3px var(--glow);
+    }
+
+    to {
+        box-shadow: none;
+    }
+}
+
+.beat.flash-hi-a,
+.sub.flash-hi-a {
+    animation: c-hi-a 0.35s ease-out forwards;
+}
+
+.beat.flash-hi-b,
+.sub.flash-hi-b {
+    animation: c-hi-b 0.35s ease-out forwards;
+}
+
+.beat.flash-mid-a,
+.sub.flash-mid-a {
+    animation: c-mid-a 0.35s ease-out forwards;
+}
+
+.beat.flash-mid-b,
+.sub.flash-mid-b {
+    animation: c-mid-b 0.35s ease-out forwards;
+}
+
+.beat.flash-lo-a,
+.sub.flash-lo-a {
+    animation: c-lo-a 0.25s ease-out forwards;
+}
+
+.beat.flash-lo-b,
+.sub.flash-lo-b {
+    animation: c-lo-b 0.25s ease-out forwards;
+}
+
+/* ── Subdivision control ─────────────────────────────────────────────────── */
+.ctrl-group {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.ctrl-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--fg);
+    min-width: 8ch;
+    text-align: center;
+}
+
+/* ── Play / Stop ─────────────────────────────────────────────────────────── */
+.play {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.35em;
+    padding: 1rem 3.5rem;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.1s, transform 0.08s;
+}
+
+.play.start {
+    background: var(--fg);
+    color: var(--bg);
+}
+
+.play.stop {
+    background: transparent;
+    box-shadow: inset 0 0 0 1px var(--fg);
+    color: var(--fg);
+}
+
+.play:hover {
+    opacity: 0.82;
+}
+
+.play:active {
+    transform: scale(0.97);
+}
