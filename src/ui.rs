@@ -60,7 +60,6 @@ struct ActiveBeat {
     beat_idx: usize,
     beat: Beat,
     parity: bool,
-    fired_at: Instant,
 }
 
 // ── Subdivision label ─────────────────────────────────────────────────────────
@@ -118,7 +117,6 @@ pub fn App() -> Element {
                         beat_idx: idx,
                         beat,
                         parity,
-                        fired_at: now,
                     }));
                     clear_at = Some(now + Duration::from_millis(120));
 

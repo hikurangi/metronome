@@ -52,11 +52,4 @@ impl AppContext {
             std::cmp::Ordering::Equal => {}
         }
     }
-
-    pub fn generate_pattern(&self) -> Vec<Beat> {
-        self.beat_states
-            .iter()
-            .flat_map(|b| std::iter::once(*b).chain(self.sub_states.iter().cloned()))
-            .collect()
-    }
 }

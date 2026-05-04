@@ -44,14 +44,14 @@ impl ClickConfig {
     }
     pub fn sub_normal(sample_rate: u32) -> Self {
         Self {
-            freq_hz: CLICK_NORMAL_FREQ_HZ / 2.0,
+            freq_hz: CLICK_SUB_NORMAL_FREQ_HZ, // CLICK_NORMAL_FREQ_HZ / 2.0,
             sample_rate,
             ..Self::default()
         }
     }
     pub fn sub_accent(sample_rate: u32) -> Self {
         Self {
-            freq_hz: CLICK_ACCENT_FREQ_HZ / 2.0,
+            freq_hz: CLICK_SUB_ACCENT_FREQ_HZ, // CLICK_ACCENT_FREQ_HZ / 2.0,
             sample_rate,
             ..Self::default()
         }
