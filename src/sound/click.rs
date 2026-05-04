@@ -5,6 +5,8 @@ use crate::constants::SAMPLE_RATE_DEFAULT;
 
 const CLICK_ACCENT_FREQ_HZ: f32 = 1320.0;
 const CLICK_NORMAL_FREQ_HZ: f32 = 880.0;
+const CLICK_SUB_ACCENT_FREQ_HZ: f32 = 660.0;
+const CLICK_SUB_NORMAL_FREQ_HZ: f32 = 528.0;
 const CLICK_DECAY: f32 = 120.0; // higher = shorter transient
 const CLICK_DURATION_MS: u32 = 60;
 
@@ -36,6 +38,20 @@ impl ClickConfig {
     pub fn accent(sample_rate: u32) -> Self {
         Self {
             freq_hz: CLICK_ACCENT_FREQ_HZ,
+            sample_rate,
+            ..Self::default()
+        }
+    }
+    pub fn sub_normal(sample_rate: u32) -> Self {
+        Self {
+            freq_hz: CLICK_NORMAL_FREQ_HZ / 2.0,
+            sample_rate,
+            ..Self::default()
+        }
+    }
+    pub fn sub_accent(sample_rate: u32) -> Self {
+        Self {
+            freq_hz: CLICK_ACCENT_FREQ_HZ / 2.0,
             sample_rate,
             ..Self::default()
         }

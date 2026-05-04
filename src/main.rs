@@ -1,6 +1,7 @@
 use rodio::buffer::SamplesBuffer;
 use rodio::cpal::traits::{DeviceTrait, HostTrait};
 use rodio::{OutputStream, Sink};
+use std::sync::atomic::Ordering;
 use std::sync::{Arc, RwLock};
 
 mod constants;
@@ -11,8 +12,8 @@ mod ui;
 
 use crate::constants::SAMPLE_RATE_DEFAULT;
 use crate::context::AppContext;
+use crate::engine::engine::{EngineState, run};
 use crate::engine::handle::EngineHandle;
-use crate::engine::state::{EngineState, run};
 use crate::sound::bank::SoundBank;
 use crate::ui::App;
 
@@ -29,12 +30,14 @@ fn main() {
     let (_stream, stream_handle) = OutputStream::try_default().expect("no audio output");
 
     let app_ctx = AppContext::new();
-    let pattern = Arc::new(RwLock::new(app_ctx.generate_pattern()));
-
-    let mut state = EngineState::new(Arc::clone(&pattern));
+    let mut state = EngineState::new(app_ctx.beat_states.clone(), app_ctx.sub_states.clone());
     let bank = SoundBank::new(sample_rate);
-    let handle = Arc::new(EngineHandle::new(pattern));
+    let handle = Arc::new(EngineHandle::new());
     let handle_engine = Arc::clone(&handle);
+
+    handle
+        .subdivisions
+        .store(app_ctx.subdivisions, Ordering::Relaxed);
 
     let sink = Arc::new(Sink::try_new(&stream_handle).unwrap());
     let sink_tick = Arc::clone(&sink);

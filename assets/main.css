@@ -116,6 +116,47 @@ body {
     margin-top: -2rem;
 }
 
+.bpm-slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: 100%;
+    max-width: 340px;
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 1px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--fg);
+    border: none;
+    transition: transform 0.1s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.5);
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--fg);
+    border: none;
+}
+
+
 /* ── BPM flash animations ────────────────────────────────────────────────── */
 @keyframes bpm-hi-a {
     from {
@@ -258,7 +299,15 @@ body {
 
 .sub-row {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.8rem;
+    justify-content: center;
+}
+
+.sub-row-wrapper {
+    min-height: 2.1rem;
+    display: flex;
+    align-items: center;
     justify-content: center;
 }
 
@@ -294,7 +343,7 @@ body {
 
 .beat.silent {
     background: transparent;
-    box-shadow: inset 0 0 0 2px var(--fg);
+    box-shadow: inset 0 0 0 1px var(--border);
 }
 
 .sub.accent {
@@ -304,12 +353,11 @@ body {
 .sub.normal {
     background: var(--dim);
     box-shadow: inset 0 0 0 1px var(--border);
-
 }
 
 .sub.silent {
     background: transparent;
-    box-shadow: inset 0 0 0 1.5px var(--fg);
+    box-shadow: inset 0 0 0 1px var(--border);
 }
 
 .beat:active,
@@ -406,6 +454,107 @@ body {
 .beat.flash-lo-b,
 .sub.flash-lo-b {
     animation: c-lo-b 0.25s ease-out forwards;
+}
+
+/* ── Ring wrap ─────────────────────────────────────────────── */
+.ring-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sweep {
+    position: absolute;
+    inset: -4px;
+    width: calc(100% + 8px);
+    height: calc(100% + 8px);
+    pointer-events: none;
+    transform: rotate(-90deg);
+    /* start from top */
+    border-radius: 50%;
+}
+
+.sub .sweep {
+    inset: -3px;
+    width: calc(100% + 6px);
+    height: calc(100% + 6px);
+}
+
+/* beat: 2π × 30 ≈ 188 */
+.sweep-fill {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 1.5px;
+    stroke-linecap: round;
+    stroke-dasharray: 188;
+    stroke-dashoffset: 0;
+}
+
+/* sub: 2π × 13 ≈ 82 */
+.sub-ring .sweep-fill {
+    stroke-dasharray: 82;
+    stroke-dashoffset: 82;
+}
+
+@keyframes sweep-even {
+    from {
+        stroke-dashoffset: 0;
+    }
+
+    to {
+        stroke-dashoffset: 188;
+    }
+}
+
+@keyframes sweep-odd {
+    from {
+        stroke-dashoffset: 0;
+    }
+
+    to {
+        stroke-dashoffset: 188;
+    }
+}
+
+@keyframes sweep-sub-even {
+    from {
+        stroke-dashoffset: 0;
+    }
+
+    to {
+        stroke-dashoffset: 82;
+    }
+}
+
+@keyframes sweep-sub-odd {
+    from {
+        stroke-dashoffset: 0;
+    }
+
+    to {
+        stroke-dashoffset: 82;
+    }
+}
+
+.sweep.even .sweep-fill {
+    animation: sweep-even linear forwards;
+}
+
+.sweep.odd .sweep-fill {
+    animation: sweep-odd linear forwards;
+}
+
+.sweep.hidden {
+    visibility: hidden;
+}
+
+.sub-ring.even .sweep-fill {
+    animation: sweep-sub-even linear forwards;
+}
+
+.sub-ring.odd .sweep-fill {
+    animation: sweep-sub-odd linear forwards;
 }
 
 /* ── Subdivision control ─────────────────────────────────────────────────── */

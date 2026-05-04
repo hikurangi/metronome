@@ -7,3 +7,4 @@ edition = "2024"
 rodio = "0.19"
 spin_sleep = "1.2"
 dioxus = { version = "0.6", features = ["desktop"] }
+tokio = { version = "1", features = ["time"] }

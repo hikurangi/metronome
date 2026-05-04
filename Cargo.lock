@@ -2740,6 +2740,7 @@ dependencies = [
  "dioxus",
  "rodio",
  "spin_sleep",
+ "tokio",
 ]
 
 [[package]]

@@ -40,13 +40,23 @@ impl AppContext {
 
     pub fn set_subdivisions(&mut self, n: usize) {
         self.subdivisions = n;
-        self.sub_states = vec![Beat::Normal; n.saturating_sub(1)];
+        let target = n.saturating_sub(1);
+        match target.cmp(&self.sub_states.len()) {
+            std::cmp::Ordering::Greater => {
+                let extra = target - self.sub_states.len();
+                self.sub_states.extend(vec![Beat::SubNormal; extra]);
+            }
+            std::cmp::Ordering::Less => {
+                self.sub_states.truncate(target);
+            }
+            std::cmp::Ordering::Equal => {}
+        }
     }
 
     pub fn generate_pattern(&self) -> Vec<Beat> {
         self.beat_states
             .iter()
-            .flat_map(|b| std::iter::once(b.clone()).chain(self.sub_states.iter().cloned()))
+            .flat_map(|b| std::iter::once(*b).chain(self.sub_states.iter().cloned()))
             .collect()
     }
 }

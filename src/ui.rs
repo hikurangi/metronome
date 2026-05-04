@@ -1,176 +1,415 @@
 use crate::constants::{BPM_MAX, BPM_MIN};
+// src/ui.rs
+use crate::context::AppContext;
+use crate::engine::handle::EngineHandle;
 use crate::sound::beat::Beat;
-use crate::{context::AppContext, engine::handle::EngineHandle};
 use dioxus::prelude::*;
 use std::sync::{Arc, atomic::Ordering};
+use std::time::{Duration, Instant};
 
-fn cycle_beat(beat: Beat) -> Beat {
-    match beat {
-        Beat::Silent => Beat::Normal,
-        Beat::Normal => Beat::Accent,
-        Beat::Accent => Beat::Silent,
+// ── Theme ─────────────────────────────────────────────────────────────────────
+
+#[derive(Clone, Copy, PartialEq)]
+enum Theme {
+    Dark,
+    Light,
+    System,
+}
+
+impl Theme {
+    fn next(self) -> Self {
+        match self {
+            Theme::Dark => Theme::Light,
+            Theme::Light => Theme::System,
+            Theme::System => Theme::Dark,
+        }
+    }
+    fn app_class(self) -> &'static str {
+        match self {
+            Theme::Dark => "app dark",
+            Theme::Light => "app light",
+            Theme::System => "app",
+        }
+    }
+    fn icon(self) -> &'static str {
+        match self {
+            Theme::Light => "☀",
+            Theme::Dark => "☾",
+            Theme::System => "◐",
+        }
     }
 }
 
-fn beat_class(beat: &Beat, large: bool) -> &'static str {
-    let size = if large { "beat" } else { "sub" };
-    match beat {
-        Beat::Accent => match size {
-            "beat" => "beat accent",
-            _ => "sub accent",
-        },
-        Beat::Normal => match size {
-            "beat" => "beat normal",
-            _ => "sub normal",
-        },
-        Beat::Silent => match size {
-            "beat" => "beat silent",
-            _ => "sub silent",
-        },
+// ── Flash helpers ─────────────────────────────────────────────────────────────
+
+// Parity-based flash class forces CSS animation restart even on same beat
+fn flash_class(beat: Beat, parity: bool) -> &'static str {
+    match (beat, parity) {
+        (Beat::Accent, true) => "flash-hi-a",
+        (Beat::Accent, false) => "flash-hi-b",
+        (Beat::Normal, true) => "flash-mid-a",
+        (Beat::Normal, false) => "flash-mid-b",
+        (Beat::SubAccent, true) | (Beat::SubNormal, true) => "flash-lo-a",
+        (Beat::SubAccent, false) | (Beat::SubNormal, false) => "flash-lo-b",
+        _ => "",
     }
 }
+
+#[derive(Clone, Copy)]
+struct ActiveBeat {
+    beat_idx: usize,
+    beat: Beat,
+    parity: bool,
+    fired_at: Instant,
+}
+
+// ── Subdivision label ─────────────────────────────────────────────────────────
+
+fn subdivision_label(n: usize) -> String {
+    match n {
+        1 => "Downbeats only".into(),
+        2 => "Eighths".into(),
+        3 => "Triplets".into(),
+        4 => "Sixteenths".into(),
+        5 => "Quintuplets".into(),
+        6 => "Sextuplets".into(),
+        7 => "Septuplets".into(),
+        8 => "32nds".into(),
+        n => format!("×{n}"),
+    }
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
 
 #[component]
 pub fn App() -> Element {
     let handle = use_context::<Arc<EngineHandle>>();
     let mut ctx = use_signal(AppContext::new);
+    let mut theme = use_signal(|| Theme::Dark);
+    let mut active = use_signal(|| Option::<ActiveBeat>::None);
+    let mut current_beat_idx = use_signal(|| Option::<(usize, bool)>::None); // (idx, parity)
 
+    // pre-clone handles
     let h_bpm_dec = Arc::clone(&handle);
     let h_bpm_inc = Arc::clone(&handle);
+    let h_bpm_slider = Arc::clone(&handle);
     let h_running = Arc::clone(&handle);
     let h_beats_dec = Arc::clone(&handle);
     let h_beats_inc = Arc::clone(&handle);
     let h_subs_dec = Arc::clone(&handle);
     let h_subs_inc = Arc::clone(&handle);
 
-    let ctx_bpm = ctx.read().bpm;
-    let ctx_is_running = ctx.read().is_running;
-    let ctx_beats_per_bar = ctx.read().beats_per_bar;
-    let ctx_subdivisions = ctx.read().subdivisions;
-    let ctx_beat_states = ctx.read().beat_states.clone();
-    let ctx_sub_states = ctx.read().sub_states.clone();
+    // ── Tick poller coroutine ─────────────────────────────────────────────────
+    let h_poll = Arc::clone(&handle);
+    use_effect(move || {
+        let h_poll = Arc::clone(&h_poll);
+        spawn(async move {
+            let mut last_tick = 0u64;
+            let mut clear_at: Option<Instant> = None;
+            loop {
+                tokio::time::sleep(Duration::from_millis(8)).await;
+                let now = Instant::now();
+                let tick = h_poll.tick_count.load(Ordering::Relaxed);
+                if tick != last_tick {
+                    let idx = h_poll.current_beat_idx.load(Ordering::Relaxed);
+                    let beat = Beat::from(h_poll.current_beat_type.load(Ordering::Relaxed));
+                    let parity = tick.is_multiple_of(2);
+                    active.set(Some(ActiveBeat {
+                        beat_idx: idx,
+                        beat,
+                        parity,
+                        fired_at: now,
+                    }));
+                    clear_at = Some(now + Duration::from_millis(120));
+
+                    // ring — persists until next tick
+                    current_beat_idx.set(Some((idx, parity)));
+
+                    last_tick = tick;
+                }
+                if let Some(t) = clear_at
+                    && now >= t
+                {
+                    active.set(None);
+                    clear_at = None;
+                }
+            }
+        });
+    });
+
+    // ── Derive display values ─────────────────────────────────────────────────
+    let bpm = ctx.read().bpm;
+    let is_running = ctx.read().is_running;
+    // let beats_per_bar = ctx.read().beats_per_bar;
+    let subdivisions = ctx.read().subdivisions;
+    let beat_states = ctx.read().beat_states.clone();
+    let sub_states = ctx.read().sub_states.clone();
+
+    let (active_idx, bpm_flash_cls) = match *active.read() {
+        Some(ab) => {
+            let fc = flash_class(ab.beat, ab.parity);
+            (Some(ab.beat_idx), format!("bpm-number {fc}"))
+        }
+        None => (None, "bpm-number".into()),
+    };
+
+    let beat_ms = 60_000u64 / bpm;
+    // let sub_ms = if subdivisions > 1 {
+    //     beat_ms / subdivisions as u64
+    // } else {
+    //     beat_ms
+    // };
 
     rsx! {
-        style { {CSS} }
-        div { class: "app",
+
+        document::Stylesheet { href: asset!("/assets/main.css") }
+
+        div { class: theme.read().app_class(),
+
+            // ── Theme toggle ─────────────────────────────────────────────────
+            button {
+                class: "theme-btn",
+                onclick: move |_| {
+                    let t = theme.read().next();
+                    theme.set(t);
+                },
+                "{theme.read().icon()}"
+            }
 
             // ── BPM ──────────────────────────────────────────────────────────
             div { class: "bpm-row",
-                button { class: "adj", onclick: move |_| {
-                    let bpm = {
-                        let mut c = ctx.write();
-                        c.bpm = (c.bpm.saturating_sub(1)).max(BPM_MIN);
-                        c.bpm
-                    };
-                    h_bpm_dec.bpm.store(bpm, Ordering::Relaxed);
-                }, "−" }
-                div { class: "bpm-number", "{ctx_bpm}" }
-                button { class: "adj", onclick: move |_| {
-                    let bpm = {
-                        let mut c = ctx.write();
-                        c.bpm = (c.bpm + 1).min(BPM_MAX);
-                        c.bpm
-                    };
-                    h_bpm_inc.bpm.store(bpm, Ordering::Relaxed);
-                }, "+" }
+                div { class: "{bpm_flash_cls}", "{bpm}" }
             }
-            div { class: "bpm-label", "BPM" }
 
-            // ── Beat grid ────────────────────────────────────────────────────
-            div { class: "beat-row",
-                {ctx_beat_states.iter().enumerate().map(|(i, beat)| {
-                    let cls = beat_class(beat, true);
-                    let h = Arc::clone(&handle);
-                    rsx! {
-                        button { key: "{i}", class: "{cls}",
-                            onclick: move |_| {
-                                let pattern = {
-                                    let mut c = ctx.write();
-                                    c.beat_states[i] = cycle_beat(c.beat_states[i].clone());
-                                    c.generate_pattern()
-                                };
-                                *h.pattern.write().unwrap() = pattern;
-                            }
+            div { class: "bpm-label", "BPM" }
+            div { class: "bpm-slider-wrap",
+                button {
+                    class: "adj",
+                    onclick: move |_| {
+                        let v = {
+                            let mut c = ctx.write();
+                            c.bpm = (c.bpm.saturating_sub(1)).max(BPM_MIN);
+                            c.bpm
+                        };
+                        h_bpm_dec.bpm.store(v, Ordering::Relaxed);
+                    },
+                    "−"
+                }
+                input {
+                    r#type: "range",
+                    min: BPM_MIN as f64,
+                    max: BPM_MAX as f64,
+                    value: bpm,
+                    oninput: move |e| {
+                        if let Ok(val) = e.value().parse::<u64>() {
+                            ctx.write().bpm = val;
+                            h_bpm_slider.bpm.store(val, Ordering::Relaxed);
+                        }
+                    },
+                }
+                button {
+                    class: "adj",
+                    onclick: move |_| {
+                        let v = {
+                            let mut c = ctx.write();
+                            c.bpm = (c.bpm + 1).min(BPM_MAX);
+                            c.bpm
+                        };
+                        h_bpm_inc.bpm.store(v, Ordering::Relaxed);
+                    },
+                    "+"
+                }
+            }
+
+            // ── Beat row ─────────────────────────────────────────────────────
+            div { class: "beat-area",
+                button {
+                    class: "adj",
+                    onclick: move |_| {
+                        let mut c = ctx.write();
+                        if c.beats_per_bar > 1 {
+                            let n = c.beats_per_bar - 1;
+                            c.set_beats_per_bar(n);
+                            *h_beats_dec.beat_states_pending.write().unwrap() = Some(
+                                c.beat_states.clone(),
+                            );
+                        }
+                    },
+                    "−"
+                }
+
+                div { class: "beat-column",
+                    div { class: "beat-grid",
+                        {
+                            beat_states
+                                .iter()
+                                .enumerate()
+                                .map(|(i, &beat)| {
+                                    let is_active = active_idx
+                                        .map(|idx| { idx % subdivisions == 0 && idx / subdivisions == i })
+                                        .unwrap_or(false);
+                                    let state_cls = match beat {
+                                        Beat::Accent => "accent",
+                                        Beat::Normal => "normal",
+                                        _ => "silent",
+                                    };
+                                    let flash_cls = active
+                                        .read()
+                                        .filter(|_| is_active)
+                                        .map(|ab| flash_class(ab.beat, ab.parity))
+                                        .unwrap_or("");
+
+                                    let (is_ring_active, parity_cls) = current_beat_idx
+                                        .read() // for beats
+                                        .as_ref()
+                                        .map(|(idx, parity)| {
+                                            let is_this = *idx == i * subdivisions;
+                                            (is_this, if *parity { "even" } else { "odd" })
+                                        })
+                                        .unwrap_or((false, ""));
+
+                                    let cls = format!("beat {state_cls} {flash_cls}");
+                                    let h = Arc::clone(&handle);
+                                    rsx! {
+                                        div { class: "ring-wrap",
+                                            button {
+                                                key: "{i}",
+                                                class: "{cls}",
+                                                onclick: move |_| {
+                                                    let mut c = ctx.write();
+                                                    c.beat_states[i] = c.beat_states[i].cycle_primary();
+                                                    *h.beat_states_pending.write().unwrap() = Some(c.beat_states.clone());
+                                                },
+                                            }
+                                            if is_ring_active {
+                                                svg {
+                                                    key: "beat-ring-{i}-{parity_cls}",
+                                                    class: if is_ring_active { "sweep {parity_cls}" } else { "sweep hidden" },
+                                                    style: "animation-duration: {beat_ms}ms",
+                                                    view_box: "0 0 66 66",
+                                                    xmlns: "http://www.w3.org/2000/svg",
+                                                    circle {
+                                                        class: "sweep-fill",
+                                                        cx: "33",
+                                                        cy: "33",
+                                                        r: "30",
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                })
                         }
                     }
-                })}
-            }
 
-            // ── Subdivision row ──────────────────────────────────────────────
-            if ctx_subdivisions > 1 {
-                div { class: "sub-row",
-                    {ctx_sub_states.iter().enumerate().map(|(i, beat)| {
-                        let cls = beat_class(beat, false);
-                        let h = Arc::clone(&handle);
-                        rsx! {
-                            button { key: "{i}", class: "{cls}",
-                                onclick: move |_| {
-                                    let pattern = {
-                                        let mut c = ctx.write();
-                                        c.sub_states[i] = cycle_beat(c.sub_states[i].clone());
-                                        c.generate_pattern()
-                                    };
-                                    *h.pattern.write().unwrap() = pattern;
+                    div { class: "sub-row-wrapper",
+                        if subdivisions > 1 {
+                            div { class: "sub-row",
+                                {
+                                    sub_states
+                                        .iter()
+                                        .enumerate()
+                                        .map(|(i, &beat)| {
+                                            let is_active = active_idx
+                                                .map(|idx| idx % subdivisions == i + 1)
+                                                .unwrap_or(false);
+                                            let state_cls = match beat {
+                                                Beat::SubAccent => "accent",
+                                                Beat::SubNormal => "normal",
+                                                _ => "silent",
+                                            };
+                                            let flash_cls = active
+                                                .read()
+                                                .filter(|_| is_active)
+                                                .map(|ab| flash_class(ab.beat, ab.parity))
+                                                .unwrap_or("");
+
+                                            let (is_ring_active, parity_cls) = current_beat_idx
+                                                .read() // for beats
+                                                .as_ref()
+                                                .map(|(idx, parity)| {
+                                                    let is_this = *idx == i * subdivisions;
+                                                    (is_this, if *parity { "even" } else { "odd" })
+                                                })
+                                                .unwrap_or((false, ""));
+                                            let cls = format!("sub {state_cls} {flash_cls}");
+                                            let h = Arc::clone(&handle);
+                                            rsx! {
+                                                div { class: "ring-wrap",
+                                                    button {
+                                                        key: "sub-{i}",
+                                                        class: "{cls}",
+                                                        onclick: move |_| {
+                                                            let mut c = ctx.write();
+                                                            let current = c.sub_states[i];
+                                                            c.sub_states[i] = current.cycle_sub();
+                                                            *h.sub_states_pending.write().unwrap() = Some(c.sub_states.clone());
+                                                        },
+                                                    }
+                                                    // render whenever this beat is the current position
+                                                    svg {
+                                                        key: "beat-ring-{i}-{parity_cls}",
+                                                        class: if is_ring_active { "sweep {parity_cls}" } else { "sweep hidden" },
+                                                        style: "animation-duration: {beat_ms}ms",
+                                                        view_box: "0 0 66 66",
+                                                        xmlns: "http://www.w3.org/2000/svg",
+                                                        circle {
+                                                            class: "sweep-fill",
+                                                            cx: "33",
+                                                            cy: "33",
+                                                            r: "30",
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        })
                                 }
                             }
                         }
-                    })}
+                    }
+                }
+
+                button {
+                    class: "adj",
+                    onclick: move |_| {
+                        let mut c = ctx.write();
+                        let n = c.beats_per_bar + 1;
+                        c.set_beats_per_bar(n);
+                        *h_beats_inc.beat_states_pending.write().unwrap() = Some(c.beat_states.clone());
+                    },
+                    "+"
                 }
             }
 
-            // ── Controls ─────────────────────────────────────────────────────
-            div { class: "controls",
-                div { class: "ctrl-group",
-                    button { class: "adj sm", onclick: move |_| {
-                        let pattern = {
-                            let mut c = ctx.write();
-                            if c.beats_per_bar > 1 {
-                                let one_fewer = c.beats_per_bar - 1;
-                                c.set_beats_per_bar(one_fewer);
-                            }
-                            c.generate_pattern()
-                        };
-                        *h_beats_dec.pattern.write().unwrap() = pattern;
-                    }, "−" }
-                    span { class: "ctrl-label", "{ctx_beats_per_bar} beats" }
-                    button { class: "adj sm", onclick: move |_| {
-                        let pattern = {
-                            let mut c = ctx.write();
-                            let one_more = c.beats_per_bar + 1;
-                            c.set_beats_per_bar(one_more);
-                            c.generate_pattern()
-                        };
-                        *h_beats_inc.pattern.write().unwrap() = pattern;
-                    }, "+" }
+            // ── Subdivision control ──────────────────────────────────────────
+            div { class: "ctrl-group",
+                button {
+                    class: "adj sm",
+                    onclick: move |_| {
+                        *h_subs_dec.sub_states_pending.write().unwrap() = Some(
+                            ctx.read().sub_states.clone(),
+                        );
+                    },
+                    "−"
                 }
-                div { class: "ctrl-group",
-                    button { class: "adj sm", onclick: move |_| {
-                        let pattern = {
-                            let mut c = ctx.write();
-                            if c.subdivisions > 1 {
-                                let one_fewer = c.subdivisions - 1;
-                                c.set_subdivisions(one_fewer);
-                            }
-                            c.generate_pattern()
-                        };
-                        *h_subs_dec.pattern.write().unwrap() = pattern;
-                    }, "−" }
-                    span { class: "ctrl-label", "÷ {ctx_subdivisions}" }
-                    button { class: "adj sm", onclick: move |_| {
-                        let pattern = {
-                            let mut c = ctx.write();
-                            let one_more = c.subdivisions + 1;
-                            c.set_subdivisions(one_more);
-                            c.generate_pattern()
-                        };
-                        *h_subs_inc.pattern.write().unwrap() = pattern;
-                    }, "+" }
+                span { class: "ctrl-label", "{subdivision_label(subdivisions)}" }
+                button {
+                    class: "adj sm",
+                    onclick: move |_| {
+                        *h_subs_inc.beat_states_pending.write().unwrap() = Some(
+                            ctx.read().beat_states.clone(),
+                        );
+                        *h_subs_inc.sub_states_pending.write().unwrap() = Some(
+                            ctx.read().sub_states.clone(),
+                        );
+                    },
+                    "+"
                 }
             }
 
             // ── Start / Stop ─────────────────────────────────────────────────
             button {
-                class: if ctx_is_running { "play stop" } else { "play start" },
+                class: if is_running { "play stop" } else { "play start" },
                 onclick: move |_| {
                     let next = {
                         let mut c = ctx.write();
@@ -179,147 +418,12 @@ pub fn App() -> Element {
                     };
                     h_running.running.store(next, Ordering::Relaxed);
                 },
-                if ctx_is_running { "■  STOP" } else { "▶  START" }
+                if is_running {
+                    "■  STOP"
+                } else {
+                    "▶  START"
+                }
             }
         }
     }
 }
-
-const CSS: &str = r#"
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap');
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-    --bg:     #080808;
-    --fg:     #f0ede8;
-    --dim:    #1c1c1c;
-    --border: #2e2e2e;
-    --mid:    #888;
-}
-
-body { background: var(--bg); }
-
-.app {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    gap: 2.4rem;
-    background: var(--bg);
-    color: var(--fg);
-    font-family: 'DM Mono', monospace;
-    user-select: none;
-    -webkit-user-select: none;
-}
-
-/* ── BPM ──────────────────────────────────────────────── */
-.bpm-row {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-}
-
-.bpm-number {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 10rem;
-    line-height: 0.9;
-    letter-spacing: -0.01em;
-    min-width: 4ch;
-    text-align: center;
-    color: var(--fg);
-}
-
-.bpm-label {
-    font-size: 0.6rem;
-    letter-spacing: 0.5em;
-    color: var(--mid);
-    text-transform: uppercase;
-    margin-top: -2rem;
-}
-
-.adj {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--fg);
-    font-family: 'DM Mono', monospace;
-    font-size: 1.4rem;
-    width: 3rem;
-    height: 3rem;
-    cursor: pointer;
-    transition: background 0.08s, border-color 0.08s;
-    line-height: 1;
-}
-
-.adj:hover  { border-color: var(--fg); }
-.adj:active { background: var(--fg); color: var(--bg); }
-.adj.sm     { width: 2rem; height: 2rem; font-size: 1rem; }
-
-/* ── Beat / Sub circles ───────────────────────────────── */
-.beat-row, .sub-row {
-    display: flex;
-    gap: 0.9rem;
-    align-items: center;
-}
-
-.sub-row { gap: 0.9rem; margin-top: -1.4rem; }
-
-.beat, .sub {
-    border-radius: 50%;
-    cursor: pointer;
-    transition: transform 0.08s, background 0.1s;
-    border: none;
-    outline: none;
-}
-
-.beat { width: 3.6rem; height: 3.6rem; }
-.sub  { width: 1.4rem; height: 1.4rem; }
-
-.beat.accent { background: var(--fg); }
-.beat.silent { background: transparent; box-shadow: inset 0 0 0 2px var(--fg); }
-.beat.normal { background: var(--dim); box-shadow: inset 0 0 0 1px var(--border); }
-
-.sub.accent  { background: var(--fg); }
-.sub.silent  { background: transparent; box-shadow: inset 0 0 0 1.5px var(--fg); }
-.sub.normal  { background: var(--dim); box-shadow: inset 0 0 0 1px var(--border); }
-
-.beat:active, .sub:active { transform: scale(0.88); }
-
-/* ── Controls ─────────────────────────────────────────── */
-.controls {
-    display: flex;
-    gap: 3rem;
-}
-
-.ctrl-group {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-}
-
-.ctrl-label {
-    font-size: 0.7rem;
-    letter-spacing: 0.12em;
-    color: var(--fg);
-    min-width: 7ch;
-    text-align: center;
-}
-
-/* ── Play / Stop ──────────────────────────────────────── */
-.play {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.75rem;
-    letter-spacing: 0.35em;
-    padding: 1rem 3.5rem;
-    cursor: pointer;
-    transition: opacity 0.1s, transform 0.08s;
-    border: none;
-}
-
-.play.start { background: var(--fg); color: var(--bg); }
-.play.stop  { background: transparent; box-shadow: inset 0 0 0 1px var(--fg); color: var(--fg); }
-
-.play:hover  { opacity: 0.82; }
-.play:active { transform: scale(0.96); }
-"#;
