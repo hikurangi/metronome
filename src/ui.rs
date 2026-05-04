@@ -386,9 +386,13 @@ pub fn App() -> Element {
                 button {
                     class: "adj sm",
                     onclick: move |_| {
-                        *h_subs_dec.sub_states_pending.write().unwrap() = Some(
-                            ctx.read().sub_states.clone(),
-                        );
+                        let mut c = ctx.write();
+                        if c.subdivisions > 1 {
+                            let n = c.subdivisions - 1;
+                            c.set_subdivisions(n);
+                        }
+                        h_subs_dec.subdivisions.store(c.subdivisions, Ordering::Relaxed);
+                        *h_subs_dec.sub_states_pending.write().unwrap() = Some(c.sub_states.clone());
                     },
                     "−"
                 }
@@ -396,12 +400,11 @@ pub fn App() -> Element {
                 button {
                     class: "adj sm",
                     onclick: move |_| {
-                        *h_subs_inc.beat_states_pending.write().unwrap() = Some(
-                            ctx.read().beat_states.clone(),
-                        );
-                        *h_subs_inc.sub_states_pending.write().unwrap() = Some(
-                            ctx.read().sub_states.clone(),
-                        );
+                        let mut c = ctx.write();
+                        let n = c.subdivisions + 1;
+                        c.set_subdivisions(n);
+                        h_subs_inc.subdivisions.store(c.subdivisions, Ordering::Relaxed);
+                        *h_subs_inc.sub_states_pending.write().unwrap() = Some(c.sub_states.clone());
                     },
                     "+"
                 }
