@@ -120,7 +120,7 @@ pub fn App() -> Element {
                 if beat_tick != last_beat_tick {
                     let idx = h.current_beat_idx.load(Ordering::Relaxed);
                     let beat = Beat::from(h.current_beat_type.load(Ordering::Relaxed));
-                    let parity = beat_tick % 2 == 0;
+                    let parity = beat_tick.is_multiple_of(2);
                     active_beat.set(Some(ActiveTick { idx, beat, parity }));
                     ring_beat.set(Some((idx, parity)));
                     beat_clear_at = Some(now + Duration::from_millis(120));
@@ -136,17 +136,17 @@ pub fn App() -> Element {
                     last_sub_tick = sub_tick;
                 }
 
-                if let Some(t) = beat_clear_at {
-                    if now >= t {
-                        active_beat.set(None);
-                        beat_clear_at = None;
-                    }
+                if let Some(t) = beat_clear_at
+                    && now >= t
+                {
+                    active_beat.set(None);
+                    beat_clear_at = None;
                 }
-                if let Some(t) = sub_clear_at {
-                    if now >= t {
-                        active_sub.set(None);
-                        sub_clear_at = None;
-                    }
+                if let Some(t) = sub_clear_at
+                    && now >= t
+                {
+                    active_sub.set(None);
+                    sub_clear_at = None;
                 }
             }
         });
