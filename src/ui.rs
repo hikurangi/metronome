@@ -261,7 +261,7 @@ pub fn App() -> Element {
                                         .read() // for beats
                                         .as_ref()
                                         .map(|(idx, parity)| {
-                                            let is_this = *idx == i * subdivisions;
+                                            let is_this = *idx == i; // * subdivisions;
                                             (is_this, if *parity { "even" } else { "odd" })
                                         })
                                         .unwrap_or((false, ""));
