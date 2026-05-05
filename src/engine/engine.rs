@@ -124,20 +124,26 @@ pub fn run(
 
         // downbeat takes priority if both arrive simultaneously
         if now >= next_downbeat {
+            let beat_idx = state.beat_index; // capture BEFORE advancing
             let beat = state.current_beat();
             state.advance_beat();
 
             last_downbeat = next_downbeat;
             next_downbeat += beat_interval;
             sub_index = 0;
+
+            // apply pending sub changes at the clean beat boundary
+            let mut sp = handle.sub_states_pending.write().unwrap();
+            if let Some(new_subs) = sp.take() {
+                state.sub_states = new_subs;
+            }
+
             if subs > 1 {
                 next_sub = last_downbeat + sub_interval;
             }
 
             on_tick(beat);
-            handle
-                .current_beat_idx
-                .store(state.beat_index, Ordering::Relaxed);
+            handle.current_beat_idx.store(beat_idx, Ordering::Relaxed);
             handle
                 .current_beat_type
                 .store(u8::from(beat), Ordering::Relaxed);

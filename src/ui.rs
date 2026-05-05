@@ -271,7 +271,7 @@ pub fn App() -> Element {
                                     rsx! {
                                         div { class: "ring-wrap",
                                             button {
-                                                key: "{i}",
+                                                key: "beat-{i}",
                                                 class: "{cls}",
                                                 onclick: move |_| {
                                                     let mut c = ctx.write();
