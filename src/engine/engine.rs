@@ -147,9 +147,12 @@ pub fn run(
             handle
                 .current_beat_type
                 .store(u8::from(beat), Ordering::Relaxed);
+            handle.beat_tick_count.fetch_add(1, Ordering::Relaxed);
             handle.tick_count.fetch_add(1, Ordering::Relaxed);
         } else if subs > 1 && sub_index < subs - 1 && now >= next_sub {
             let sub = state.current_sub(sub_index);
+            handle.current_sub_idx.store(sub_index, Ordering::Relaxed);
+
             sub_index += 1;
             next_sub += sub_interval;
 
@@ -157,6 +160,7 @@ pub fn run(
             handle
                 .current_beat_type
                 .store(u8::from(sub), Ordering::Relaxed);
+            handle.sub_tick_count.fetch_add(1, Ordering::Relaxed);
             handle.tick_count.fetch_add(1, Ordering::Relaxed);
         }
     }

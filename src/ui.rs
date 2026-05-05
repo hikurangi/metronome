@@ -1,9 +1,9 @@
 use crate::constants::{BPM_MAX, BPM_MIN};
-// src/ui.rs
 use crate::context::AppContext;
 use crate::engine::handle::EngineHandle;
 use crate::sound::beat::Beat;
 use dioxus::prelude::*;
+use std::ops::Deref;
 use std::sync::{Arc, atomic::Ordering};
 use std::time::{Duration, Instant};
 
@@ -56,8 +56,8 @@ fn flash_class(beat: Beat, parity: bool) -> &'static str {
 }
 
 #[derive(Clone, Copy)]
-struct ActiveBeat {
-    beat_idx: usize,
+struct ActiveTick {
+    idx: usize,
     beat: Beat,
     parity: bool,
 }
@@ -85,8 +85,11 @@ pub fn App() -> Element {
     let handle = use_context::<Arc<EngineHandle>>();
     let mut ctx = use_signal(AppContext::new);
     let mut theme = use_signal(|| Theme::Dark);
-    let mut active = use_signal(|| Option::<ActiveBeat>::None);
-    let mut current_beat_idx = use_signal(|| Option::<(usize, bool)>::None); // (idx, parity)
+
+    // separate signals for beats and subs
+    let mut active_beat = use_signal(|| Option::<ActiveTick>::None);
+    let mut active_sub = use_signal(|| Option::<ActiveTick>::None);
+    let mut ring_beat = use_signal(|| Option::<(usize, bool)>::None); // persists for full beat duration
 
     // pre-clone handles
     let h_bpm_dec = Arc::clone(&handle);
@@ -98,38 +101,53 @@ pub fn App() -> Element {
     let h_subs_dec = Arc::clone(&handle);
     let h_subs_inc = Arc::clone(&handle);
 
-    // ── Tick poller coroutine ─────────────────────────────────────────────────
+    // ── Tick poller ───────────────────────────────────────────────────────────
     let h_poll = Arc::clone(&handle);
     use_effect(move || {
-        let h_poll = Arc::clone(&h_poll);
+        let h = Arc::clone(&h_poll);
         spawn(async move {
-            let mut last_tick = 0u64;
-            let mut clear_at: Option<Instant> = None;
+            let mut last_beat_tick = 0u64;
+            let mut last_sub_tick = 0u64;
+            let mut beat_clear_at: Option<Instant> = None;
+            let mut sub_clear_at: Option<Instant> = None;
+
             loop {
                 tokio::time::sleep(Duration::from_millis(8)).await;
                 let now = Instant::now();
-                let tick = h_poll.tick_count.load(Ordering::Relaxed);
-                if tick != last_tick {
-                    let idx = h_poll.current_beat_idx.load(Ordering::Relaxed);
-                    let beat = Beat::from(h_poll.current_beat_type.load(Ordering::Relaxed));
-                    let parity = tick.is_multiple_of(2);
-                    active.set(Some(ActiveBeat {
-                        beat_idx: idx,
-                        beat,
-                        parity,
-                    }));
-                    clear_at = Some(now + Duration::from_millis(120));
 
-                    // ring — persists until next tick
-                    current_beat_idx.set(Some((idx, parity)));
+                let beat_tick = h.beat_tick_count.load(Ordering::Relaxed);
+                let sub_tick = h.sub_tick_count.load(Ordering::Relaxed);
 
-                    last_tick = tick;
+                if beat_tick != last_beat_tick {
+                    let idx = h.current_beat_idx.load(Ordering::Relaxed);
+                    let beat = Beat::from(h.current_beat_type.load(Ordering::Relaxed));
+                    let parity = beat_tick % 2 == 0;
+                    active_beat.set(Some(ActiveTick { idx, beat, parity }));
+                    ring_beat.set(Some((idx, parity)));
+                    beat_clear_at = Some(now + Duration::from_millis(120));
+                    last_beat_tick = beat_tick;
                 }
-                if let Some(t) = clear_at
-                    && now >= t
-                {
-                    active.set(None);
-                    clear_at = None;
+
+                if sub_tick != last_sub_tick {
+                    let idx = h.current_sub_idx.load(Ordering::Relaxed);
+                    let beat = Beat::from(h.current_beat_type.load(Ordering::Relaxed));
+                    let parity = sub_tick % 2 == 0;
+                    active_sub.set(Some(ActiveTick { idx, beat, parity }));
+                    sub_clear_at = Some(now + Duration::from_millis(80));
+                    last_sub_tick = sub_tick;
+                }
+
+                if let Some(t) = beat_clear_at {
+                    if now >= t {
+                        active_beat.set(None);
+                        beat_clear_at = None;
+                    }
+                }
+                if let Some(t) = sub_clear_at {
+                    if now >= t {
+                        active_sub.set(None);
+                        sub_clear_at = None;
+                    }
                 }
             }
         });
@@ -138,28 +156,21 @@ pub fn App() -> Element {
     // ── Derive display values ─────────────────────────────────────────────────
     let bpm = ctx.read().bpm;
     let is_running = ctx.read().is_running;
-    // let beats_per_bar = ctx.read().beats_per_bar;
     let subdivisions = ctx.read().subdivisions;
     let beat_states = ctx.read().beat_states.clone();
     let sub_states = ctx.read().sub_states.clone();
+    let beat_ms = 60_000u64 / bpm;
 
-    let (active_idx, bpm_flash_cls) = match *active.read() {
-        Some(ab) => {
-            let fc = flash_class(ab.beat, ab.parity);
-            (Some(ab.beat_idx), format!("bpm-number {fc}"))
-        }
-        None => (None, "bpm-number".into()),
+    // BPM flash — fires on any tick
+    let bpm_flash_cls = match *active_beat.read() {
+        Some(ab) => format!("bpm-number {}", flash_class(ab.beat, ab.parity)),
+        None => match *active_sub.read() {
+            Some(ab) => format!("bpm-number {}", flash_class(ab.beat, ab.parity)),
+            None => "bpm-number".into(),
+        },
     };
 
-    let beat_ms = 60_000u64 / bpm;
-    // let sub_ms = if subdivisions > 1 {
-    //     beat_ms / subdivisions as u64
-    // } else {
-    //     beat_ms
-    // };
-
     rsx! {
-
         document::Stylesheet { href: asset!("/assets/main.css") }
 
         div { class: theme.read().app_class(),
@@ -243,33 +254,31 @@ pub fn App() -> Element {
                                 .iter()
                                 .enumerate()
                                 .map(|(i, &beat)| {
-                                    let is_active = active_idx
-                                        .map(|idx| { idx % subdivisions == 0 && idx / subdivisions == i })
-                                        .unwrap_or(false);
+                                    let is_flash = active_beat
+                                        .read().is_some_and(|ab| ab.idx == i);
+                                    let flash_cls = active_beat
+                                        .read()
+                                        .filter(|_| is_flash)
+                                        .map(|ab| flash_class(ab.beat, ab.parity))
+                                        .unwrap_or("");
+                                    let (is_ring, parity_cls) = ring_beat
+                                        .read()
+                                        .deref()
+                                        .map_or(
+                                            (false, ""),
+                                            |(idx, parity)| {
+                                                (idx == i, if parity { "even" } else { "odd" })
+                                            },
+                                        );
                                     let state_cls = match beat {
                                         Beat::Accent => "accent",
                                         Beat::Normal => "normal",
                                         _ => "silent",
                                     };
-                                    let flash_cls = active
-                                        .read()
-                                        .filter(|_| is_active)
-                                        .map(|ab| flash_class(ab.beat, ab.parity))
-                                        .unwrap_or("");
-
-                                    let (is_ring_active, parity_cls) = current_beat_idx
-                                        .read() // for beats
-                                        .as_ref()
-                                        .map(|(idx, parity)| {
-                                            let is_this = *idx == i; // * subdivisions;
-                                            (is_this, if *parity { "even" } else { "odd" })
-                                        })
-                                        .unwrap_or((false, ""));
-
                                     let cls = format!("beat {state_cls} {flash_cls}");
                                     let h = Arc::clone(&handle);
                                     rsx! {
-                                        div { class: "ring-wrap",
+                                        div { key: "beat-wrap-{i}", class: "ring-wrap",
                                             button {
                                                 key: "beat-{i}",
                                                 class: "{cls}",
@@ -279,19 +288,17 @@ pub fn App() -> Element {
                                                     *h.beat_states_pending.write().unwrap() = Some(c.beat_states.clone());
                                                 },
                                             }
-                                            if is_ring_active {
-                                                svg {
-                                                    key: "beat-ring-{i}-{parity_cls}",
-                                                    class: if is_ring_active { "sweep {parity_cls}" } else { "sweep hidden" },
-                                                    style: "animation-duration: {beat_ms}ms",
-                                                    view_box: "0 0 66 66",
-                                                    xmlns: "http://www.w3.org/2000/svg",
-                                                    circle {
-                                                        class: "sweep-fill",
-                                                        cx: "33",
-                                                        cy: "33",
-                                                        r: "30",
-                                                    }
+                                            svg {
+                                                key: "beat-ring-{i}-{parity_cls}",
+                                                class: if is_ring { "sweep {parity_cls}" } else { "sweep hidden" },
+                                                style: "animation-duration: {beat_ms}ms",
+                                                view_box: "0 0 66 66",
+                                                xmlns: "http://www.w3.org/2000/svg",
+                                                circle {
+                                                    class: "sweep-fill",
+                                                    cx: "33",
+                                                    cy: "33",
+                                                    r: "30",
                                                 }
                                             }
                                         }
@@ -308,32 +315,22 @@ pub fn App() -> Element {
                                         .iter()
                                         .enumerate()
                                         .map(|(i, &beat)| {
-                                            let is_active = active_idx
-                                                .map(|idx| idx % subdivisions == i + 1)
-                                                .unwrap_or(false);
+                                            let is_flash = active_sub
+                                            .read().is_some_and(|ab| ab.idx == i);
+                                            let flash_cls = active_sub
+                                                .read()
+                                                .filter(|_| is_flash)
+                                                .map(|ab| flash_class(ab.beat, ab.parity))
+                                                .unwrap_or("");
                                             let state_cls = match beat {
                                                 Beat::SubAccent => "accent",
                                                 Beat::SubNormal => "normal",
                                                 _ => "silent",
                                             };
-                                            let flash_cls = active
-                                                .read()
-                                                .filter(|_| is_active)
-                                                .map(|ab| flash_class(ab.beat, ab.parity))
-                                                .unwrap_or("");
-
-                                            let (is_ring_active, parity_cls) = current_beat_idx
-                                                .read() // for beats
-                                                .as_ref()
-                                                .map(|(idx, parity)| {
-                                                    let is_this = *idx == i * subdivisions;
-                                                    (is_this, if *parity { "even" } else { "odd" })
-                                                })
-                                                .unwrap_or((false, ""));
                                             let cls = format!("sub {state_cls} {flash_cls}");
                                             let h = Arc::clone(&handle);
                                             rsx! {
-                                                div { class: "ring-wrap",
+                                                div { key: "sub-wrap-{i}", class: "ring-wrap",
                                                     button {
                                                         key: "sub-{i}",
                                                         class: "{cls}",
@@ -343,20 +340,6 @@ pub fn App() -> Element {
                                                             c.sub_states[i] = current.cycle_sub();
                                                             *h.sub_states_pending.write().unwrap() = Some(c.sub_states.clone());
                                                         },
-                                                    }
-                                                    // render whenever this beat is the current position
-                                                    svg {
-                                                        key: "beat-ring-{i}-{parity_cls}",
-                                                        class: if is_ring_active { "sweep {parity_cls}" } else { "sweep hidden" },
-                                                        style: "animation-duration: {beat_ms}ms",
-                                                        view_box: "0 0 66 66",
-                                                        xmlns: "http://www.w3.org/2000/svg",
-                                                        circle {
-                                                            class: "sweep-fill",
-                                                            cx: "33",
-                                                            cy: "33",
-                                                            r: "30",
-                                                        }
                                                     }
                                                 }
                                             }
