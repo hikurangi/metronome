@@ -10,22 +10,22 @@
 
 /* ── Themes ──────────────────────────────────────────────────────────────── */
 :root {
-    --bg: #0a0a0a;
-    --fg: #ede8e0;
-    --dim: #1a1a1a;
-    --border: #2d2d2d;
-    --mid: #555;
-    --glow: rgba(237, 232, 224, 0.22);
+    --bg: #f2efe8;
+    --fg: #111;
+    --dim: #e2dfd8;
+    --border: #ccc;
+    --mid: #999;
+    --glow: rgba(0, 0, 0, 0.12);
 }
 
-@media (prefers-color-scheme: light) {
+@media (prefers-color-scheme: dark) {
     :root {
-        --bg: #f2efe8;
-        --fg: #111;
-        --dim: #e2dfd8;
-        --border: #ccc;
-        --mid: #999;
-        --glow: rgba(0, 0, 0, 0.12);
+        --bg: #0a0a0a;
+        --fg: #ede8e0;
+        --dim: #1a1a1a;
+        --border: #2d2d2d;
+        --mid: #555;
+        --glow: rgba(237, 232, 224, 0.22);
     }
 }
 

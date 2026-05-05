@@ -84,7 +84,7 @@ fn subdivision_label(n: usize) -> String {
 pub fn App() -> Element {
     let handle = use_context::<Arc<EngineHandle>>();
     let mut ctx = use_signal(AppContext::new);
-    let mut theme = use_signal(|| Theme::Dark);
+    let mut theme = use_signal(|| Theme::Light);
 
     // separate signals for beats and subs
     let mut active_beat = use_signal(|| Option::<ActiveTick>::None);
