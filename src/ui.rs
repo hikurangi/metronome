@@ -42,7 +42,6 @@ impl Theme {
 
 // ── Flash helpers ─────────────────────────────────────────────────────────────
 
-// Parity-based flash class forces CSS animation restart even on same beat
 fn flash_class(beat: Beat, parity: bool) -> &'static str {
     match (beat, parity) {
         (Beat::Accent, true) => "flash-hi-a",
