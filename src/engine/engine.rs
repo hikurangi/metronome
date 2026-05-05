@@ -99,16 +99,6 @@ pub fn run(
                 state.beat_states = new_beats;
             }
         }
-        // {
-        //     let mut sp = handle.sub_states_pending.write().unwrap();
-        //     if let Some(new_subs) = sp.take() {
-        //         state.sub_states = new_subs;
-        //         // reschedule subs from last downbeat, downbeat untouched
-        //         sub_index = 0;
-        //         next_sub = last_downbeat + sub_interval;
-        //     }
-        // }
-
         let now = Instant::now();
 
         let next_event = if subs > 1 && sub_index < subs - 1 {
