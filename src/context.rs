@@ -1,9 +1,13 @@
 use crate::constants::BPM_DEFAULT;
+use crate::session::config::{BlockConfig, LadderConfig, Mode};
 use crate::sound::beat::Beat;
 
 #[derive(Clone)]
 pub struct AppContext {
     pub bpm: u64,
+    pub mode: Mode,
+    pub block_config: BlockConfig,   // persisted
+    pub ladder_config: LadderConfig, // persisted
     pub is_running: bool,
     pub beats_per_bar: usize,
     pub subdivisions: usize,
@@ -21,6 +25,9 @@ impl AppContext {
             subdivisions: 1,
             beat_states: Self::default_beat_states(beats_per_bar),
             sub_states: vec![],
+            mode: Mode::Infinity,
+            block_config: BlockConfig::default(),
+            ladder_config: LadderConfig::default(),
         }
     }
 
