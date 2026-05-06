@@ -1,8 +1,8 @@
+// main.rs
 use rodio::buffer::SamplesBuffer;
 use rodio::cpal::traits::{DeviceTrait, HostTrait};
 use rodio::{OutputStream, Sink};
-use std::sync::Arc;
-use std::sync::atomic::Ordering;
+use std::sync::{Arc, atomic::Ordering};
 
 mod constants;
 mod context;
@@ -15,8 +15,10 @@ use crate::constants::SAMPLE_RATE_DEFAULT;
 use crate::context::AppContext;
 use crate::engine::engine::{EngineState, run};
 use crate::engine::handle::EngineHandle;
+use crate::session::handle::SessionHandle;
 use crate::sound::bank::SoundBank;
-use crate::ui::App;
+use crate::ui::Metronome;
+// use crate::ui::App;
 
 fn device_sample_rate() -> u32 {
     rodio::cpal::default_host()
@@ -31,12 +33,14 @@ fn main() {
     let (_stream, stream_handle) = OutputStream::try_default().expect("no audio output");
 
     let app_ctx = AppContext::new();
-    let mut state = EngineState::new(app_ctx.beat_states.clone(), app_ctx.sub_states.clone());
-    let bank = SoundBank::new(sample_rate);
-    let handle = Arc::new(EngineHandle::new());
-    let handle_engine = Arc::clone(&handle);
 
-    handle
+    let mut state = EngineState::new(app_ctx.beat_states.clone(), app_ctx.sub_states.clone());
+
+    let bank = SoundBank::new(sample_rate);
+    let engine = Arc::new(EngineHandle::new());
+    let session = Arc::new(SessionHandle::new());
+
+    engine
         .subdivisions
         .store(app_ctx.subdivisions, Ordering::Relaxed);
 
@@ -44,10 +48,11 @@ fn main() {
     let sink_tick = Arc::clone(&sink);
     let sink_stop = Arc::clone(&sink);
 
+    let engine_thread = Arc::clone(&engine);
     std::thread::spawn(move || {
         run(
             &mut state,
-            handle_engine,
+            engine_thread,
             |beat| {
                 if let Some(buf) = bank.get(&beat) {
                     sink_tick.append(SamplesBuffer::new(1, sample_rate, buf.to_vec()));
@@ -58,7 +63,14 @@ fn main() {
         );
     });
 
+    let session_controller = Arc::clone(&session);
+    let engine_for_session = Arc::clone(&engine);
+    std::thread::spawn(move || {
+        session::controller::run(session_controller, engine_for_session);
+    });
+
     dioxus::LaunchBuilder::new()
-        .with_context(handle)
-        .launch(App);
+        .with_context(engine)
+        .with_context(session)
+        .launch(Metronome);
 }

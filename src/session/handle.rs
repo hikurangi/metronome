@@ -1,3 +1,5 @@
+use crate::session::config::{BlockConfig, LadderConfig};
+use std::sync::RwLock;
 use std::sync::atomic::{AtomicBool, AtomicU8, AtomicU64, AtomicUsize};
 
 #[repr(u8)]
@@ -43,6 +45,9 @@ pub struct SessionHandle {
     pub paused: AtomicBool,
     // commands → controller
     pub cmd: AtomicU8,
+    pub mode: AtomicU8, // 0=Infinity 1=Block 2=Ladder
+    pub block_config: RwLock<Option<BlockConfig>>,
+    pub ladder_config: RwLock<Option<LadderConfig>>,
 }
 
 impl SessionHandle {
@@ -57,6 +62,9 @@ impl SessionHandle {
             total_steps: AtomicUsize::new(0),
             paused: AtomicBool::new(false),
             cmd: AtomicU8::new(Cmd::None as u8),
+            mode: AtomicU8::new(0),
+            block_config: RwLock::new(None),
+            ladder_config: RwLock::new(None),
         }
     }
 }

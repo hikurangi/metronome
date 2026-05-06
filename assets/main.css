@@ -564,3 +564,162 @@ input[type="range"]::-moz-range-thumb {
 .play:active {
     transform: scale(0.97);
 }
+
+/* ── Mode slider ──────────────────────────────────────────────────────────── */
+.mode-slider {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 2rem;
+    position: absolute;
+    bottom: 1.5rem;
+}
+
+.mode-pip {
+    background: none;
+    border: none;
+    color: var(--mid);
+    font-size: 1rem;
+    width: 2rem;
+    height: 2rem;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: color 0.15s, background 0.15s;
+}
+
+.mode-pip.active {
+    color: var(--fg);
+    background: var(--dim);
+}
+
+/* ── Config panel ─────────────────────────────────────────────────────────── */
+.config-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.8rem;
+    align-items: center;
+    width: 100%;
+    max-width: 360px;
+}
+
+.config-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    letter-spacing: 0.05em;
+    color: var(--fg);
+}
+
+.config-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    width: 100%;
+}
+
+.config-field label {
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    color: var(--mid);
+    text-transform: uppercase;
+}
+
+.config-input-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.config-input-row input[type="number"] {
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    color: var(--fg);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    width: 4ch;
+    text-align: right;
+    outline: none;
+    -moz-appearance: textfield;
+    padding: 0;
+}
+
+.config-input-row input[type="number"]::-webkit-inner-spin-button,
+.config-input-row input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+}
+
+.config-input-row input[type="number"]:focus {
+    border-bottom-color: var(--fg);
+}
+
+.config-unit {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--mid);
+    text-transform: uppercase;
+}
+
+.config-start {
+    margin-top: 0.5rem;
+    width: 100%;
+    text-align: center;
+}
+
+/* ── Dual play controls (Block/Ladder) ────────────────────────────────────── */
+.play-controls {
+    display: flex;
+    gap: 0.8rem;
+}
+
+/* ── Timer ───────────────────────────────────────────────────────────────── */
+.timer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.timer-main {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 5rem;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+    cursor: pointer;
+    transition: opacity 0.15s;
+    opacity: 0.9;
+}
+
+.timer-main:hover {
+    opacity: 1;
+}
+
+.timer-phase {
+    font-size: 0.55rem;
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+    color: var(--mid);
+}
+
+.timer-step-row {
+    display: flex;
+    gap: 1.2rem;
+    align-items: baseline;
+    margin-top: 0.2rem;
+}
+
+.timer-step-count {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--mid);
+}
+
+.timer-step-remaining {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    color: var(--mid);
+    letter-spacing: 0.02em;
+}
