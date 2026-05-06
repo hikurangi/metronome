@@ -1,4 +1,3 @@
-// src/ui/components/metronome.rs
 mod components;
 mod helpers;
 
