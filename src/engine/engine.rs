@@ -115,6 +115,9 @@ pub fn run(
         // downbeat takes priority if both arrive simultaneously
         if now >= next_downbeat {
             let beat_idx = state.beat_index; // capture BEFORE advancing
+            if beat_idx == 0 {
+                handle.bar_count.fetch_add(1, Ordering::Relaxed);
+            }
             let beat = state.current_beat();
             state.advance_beat();
 

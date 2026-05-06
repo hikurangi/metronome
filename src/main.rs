@@ -7,6 +7,7 @@ use std::sync::atomic::Ordering;
 mod constants;
 mod context;
 mod engine;
+mod session;
 mod sound;
 mod ui;
 

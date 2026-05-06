@@ -6,6 +6,7 @@ use std::sync::{Arc, RwLock};
 pub struct EngineHandle {
     pub bpm: AtomicU64,
     pub running: AtomicBool,
+    pub bar_count: AtomicU64, // increments when beat_index wraps to 0
     pub subdivisions: AtomicUsize,
     pub tick_count: AtomicU64,
     pub current_beat_idx: AtomicUsize,
@@ -27,6 +28,7 @@ impl EngineHandle {
             current_beat_idx: AtomicUsize::new(0),
             current_beat_type: AtomicU8::new(0),
             current_sub_idx: AtomicUsize::new(0),
+            bar_count: AtomicU64::new(0),
             beat_tick_count: AtomicU64::new(0),
             sub_tick_count: AtomicU64::new(0),
             beat_states_pending: Arc::new(RwLock::new(None)),
