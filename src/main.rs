@@ -16,8 +16,7 @@ use crate::engine::engine::{EngineState, run};
 use crate::engine::handle::EngineHandle;
 use crate::session::handle::SessionHandle;
 use crate::sound::bank::SoundBank;
-use crate::ui::Metronome;
-// use crate::ui::App;
+use crate::ui::App;
 
 fn device_sample_rate() -> u32 {
     rodio::cpal::default_host()
@@ -71,5 +70,5 @@ fn main() {
     dioxus::LaunchBuilder::new()
         .with_context(engine)
         .with_context(session)
-        .launch(Metronome);
+        .launch(App);
 }
