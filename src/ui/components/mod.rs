@@ -1,3 +1,4 @@
+pub mod beat_control_buttons;
 pub mod bpm_slider;
 pub mod config;
 pub mod metronome;
