@@ -13,7 +13,7 @@ use crate::{
 
 #[component]
 pub fn PlaybackControls() -> Element {
-    let mut ctx: Signal<AppContext> = use_context::<Signal<AppContext>>();
+    let mut ctx = use_context::<Signal<AppContext>>();
     let is_running = ctx.read().is_running;
     let mode = ctx.read().mode;
 
