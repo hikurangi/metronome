@@ -6,7 +6,7 @@ use crate::{
     context::AppContext,
     engine::handle::EngineHandle,
     session::{
-        config::Mode,
+        config::{Mode, SessionStatus},
         handle::{Cmd, SessionHandle},
     },
 };
@@ -16,6 +16,7 @@ pub fn PlaybackControls() -> Element {
     let mut ctx = use_context::<Signal<AppContext>>();
     let is_running = ctx.read().is_running;
     let mode = ctx.read().mode;
+    let mut session_status = use_context::<Signal<SessionStatus>>();
 
     let engine = use_context::<Arc<EngineHandle>>();
     let h_running = Arc::clone(&engine);
@@ -50,6 +51,8 @@ pub fn PlaybackControls() -> Element {
                     onclick: move |_| {
                         let cmd = if is_paused { Cmd::Resume as u8 } else { Cmd::Pause as u8 };
                         s_running.cmd.store(cmd, Ordering::Relaxed);
+                        // NOTE: possibly need to update enum for "paused"
+                        session_status.set(SessionStatus::Active);
                     },
                     if is_paused {
                         "▶  RESUME"
@@ -61,6 +64,7 @@ pub fn PlaybackControls() -> Element {
                     class: "play stop",
                     onclick: move |_| {
                         session.cmd.store(Cmd::Stop as u8, Ordering::Relaxed);
+                        session_status.set(SessionStatus::Inactive);
                     },
                     "■  STOP"
                 }

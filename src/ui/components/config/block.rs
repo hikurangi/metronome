@@ -1,5 +1,6 @@
 use crate::context::AppContext;
 use crate::engine::handle::EngineHandle;
+use crate::session::config::SessionStatus;
 use crate::session::handle::{Cmd, SessionHandle};
 use dioxus::prelude::*;
 use std::sync::{Arc, atomic::Ordering};
@@ -9,6 +10,7 @@ pub fn BlockConfigPanel() -> Element {
     let mut ctx = use_context::<Signal<AppContext>>();
     let engine = use_context::<Arc<EngineHandle>>();
     let session = use_context::<Arc<SessionHandle>>();
+    let mut session_status = use_context::<Signal<SessionStatus>>();
 
     let bpm = ctx.read().block_config.bpm;
     let duration = ctx.read().block_config.duration.as_secs();
@@ -29,7 +31,7 @@ pub fn BlockConfigPanel() -> Element {
                         value: bpm,
                         oninput: move |e| {
                             if let Ok(v) = e.value().parse::<u64>() {
-                                ctx.write().block_config.bpm = v;
+                                ctx.write().block_config.bpm = v.clamp(1, 420);
                             }
                         },
                     }
@@ -54,7 +56,7 @@ pub fn BlockConfigPanel() -> Element {
                             }
                         },
                     }
-                    span { class: "config-unit", "m" }
+                    span { class: "config-separator", ":" }
                     input {
                         r#type: "number",
                         min: 0,
@@ -69,7 +71,7 @@ pub fn BlockConfigPanel() -> Element {
                             }
                         },
                     }
-                    span { class: "config-unit", "s" }
+                    span { class: "config-unit", "min : sec" }
                 }
             }
 
@@ -81,6 +83,7 @@ pub fn BlockConfigPanel() -> Element {
                     session.mode.store(1, Ordering::Relaxed);
                     engine.bpm.store(cfg.bpm, Ordering::Relaxed);
                     session.cmd.store(Cmd::Start as u8, Ordering::Relaxed);
+                    session_status.set(SessionStatus::Active);
                 },
                 "▶  START"
             }

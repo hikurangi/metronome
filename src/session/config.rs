@@ -1,6 +1,12 @@
 use std::time::Duration;
 
 #[derive(Clone, Copy, PartialEq)]
+pub enum SessionStatus {
+    Active,
+    Inactive, // paused?
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub enum Mode {
     Infinity,
     Block,
