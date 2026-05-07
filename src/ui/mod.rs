@@ -5,6 +5,7 @@ use crate::context::AppContext;
 use crate::engine::handle::EngineHandle;
 use crate::session::config::Mode;
 use crate::sound::beat::Beat;
+use crate::ui::components::beat_control_buttons::{BeatDecrementButton, BeatIncrementButton};
 use crate::ui::components::bpm_slider::BPMSlider;
 use crate::ui::components::playback_controls::PlaybackControls;
 use crate::ui::components::ui_theme_toggle::UIThemeToggle;
@@ -26,8 +27,6 @@ pub fn App() -> Element {
 
     let mode = ctx.read().mode;
 
-    let h_beats_dec = Arc::clone(&engine);
-    let h_beats_inc = Arc::clone(&engine);
     let h_subs_dec = Arc::clone(&engine);
     let h_subs_inc = Arc::clone(&engine);
 
@@ -69,22 +68,9 @@ pub fn App() -> Element {
 
             // ── Beat grid ─────────────────────────────────────────────────────────
             div { class: "beat-area",
-                button {
-                    class: "adj",
-                    onclick: move |_| {
-                        let mut c = ctx.write();
-                        if c.beats_per_bar > 1 {
-                            let n = c.beats_per_bar - 1;
-                            c.set_beats_per_bar(n);
-                            *h_beats_dec.beat_states_pending.write().unwrap() = Some(
-                                c.beat_states.clone(),
-                            );
-                        }
-                    },
-                    "−"
-                }
 
-                // TODO: factor out
+                BeatDecrementButton {}
+
                 div { class: "beat-column",
                     div { class: "beat-grid",
                         {
@@ -142,7 +128,6 @@ pub fn App() -> Element {
                         }
                     }
 
-                    // TODO: factor out
                     div { class: "sub-row-wrapper",
                         if subdivisions > 1 {
                             div { class: "sub-row",
@@ -184,16 +169,7 @@ pub fn App() -> Element {
                     }
                 }
 
-                button {
-                    class: "adj",
-                    onclick: move |_| {
-                        let mut c = ctx.write();
-                        let n = c.beats_per_bar + 1;
-                        c.set_beats_per_bar(n);
-                        *h_beats_inc.beat_states_pending.write().unwrap() = Some(c.beat_states.clone());
-                    },
-                    "+"
-                }
+                BeatIncrementButton {}
             }
 
             // ── Subdivision control ───────────────────────────────────────────────
