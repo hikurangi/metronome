@@ -85,7 +85,7 @@ fn run_block(session: &SessionHandle, engine: &EngineHandle) {
 
     let total_ms = cfg.duration.as_millis() as u64;
     session.phase.store(Phase::Playing as u8, Ordering::Relaxed);
-    session.session_total.store(total_ms, Ordering::Relaxed);
+    session.session_total_ms.store(total_ms, Ordering::Relaxed);
     session.session_elapsed.store(0, Ordering::Relaxed);
 
     engine.bpm.store(cfg.bpm, Ordering::Relaxed);
@@ -111,9 +111,15 @@ fn run_block(session: &SessionHandle, engine: &EngineHandle) {
 
         let elapsed_ms = (start.elapsed() - paused_total).as_millis() as u64;
         session.session_elapsed.store(elapsed_ms, Ordering::Relaxed);
+        // session
+        //     .session_total_ms
+        //     .store(total_ms.saturating_sub(elapsed_ms), Ordering::Relaxed);
+
+        let remaining_ms = total_ms.saturating_sub(elapsed_ms);
+        session.session_elapsed.store(elapsed_ms, Ordering::Relaxed);
         session
-            .session_total
-            .store(total_ms.saturating_sub(elapsed_ms), Ordering::Relaxed);
+            .session_remaining_ms
+            .store(remaining_ms, Ordering::Relaxed);
 
         if elapsed_ms >= total_ms {
             // wait for clean bar boundary before stopping
@@ -137,7 +143,7 @@ fn run_ladder(session: &SessionHandle, engine: &EngineHandle) {
     };
 
     let total_ms = total_ladder_duration_ms(&cfg);
-    session.session_total.store(total_ms, Ordering::Relaxed);
+    session.session_total_ms.store(total_ms, Ordering::Relaxed);
     session
         .total_steps
         .store(cfg.cycle_count, Ordering::Relaxed);
@@ -158,7 +164,7 @@ fn run_ladder(session: &SessionHandle, engine: &EngineHandle) {
         let count_in_ms = 4 * beat_interval_ms;
 
         // ── Rest phase ─────────────────────────────────────────────────────
-        if rest_ms > 0 {
+        if rest_ms > 0 && cycle > 0 {
             engine.running.store(false, Ordering::Relaxed);
             session.phase.store(Phase::Resting as u8, Ordering::Relaxed);
 
@@ -205,7 +211,7 @@ fn run_ladder(session: &SessionHandle, engine: &EngineHandle) {
 
         // ── Step phase ─────────────────────────────────────────────────────
         session.phase.store(Phase::Playing as u8, Ordering::Relaxed);
-        session.step_total.store(step_ms, Ordering::Relaxed);
+        session.step_total_ms.store(step_ms, Ordering::Relaxed);
         engine.bpm.store(bpm, Ordering::Relaxed);
         engine.running.store(true, Ordering::Relaxed);
 
@@ -215,7 +221,9 @@ fn run_ladder(session: &SessionHandle, engine: &EngineHandle) {
                 return;
             }
             let step_elapsed = step_start.elapsed().as_millis() as u64;
-            session.step_elapsed.store(step_elapsed, Ordering::Relaxed);
+            session
+                .step_elapsed_ms
+                .store(step_elapsed, Ordering::Relaxed);
             update_session_timer(session, session_start, total_ms);
 
             if step_elapsed >= step_ms {
@@ -236,7 +244,7 @@ fn update_session_timer(session: &SessionHandle, start: Instant, total_ms: u64) 
     let elapsed = start.elapsed().as_millis() as u64;
     session.session_elapsed.store(elapsed, Ordering::Relaxed);
     session
-        .session_total
+        .session_total_ms
         .store(total_ms.saturating_sub(elapsed), Ordering::Relaxed);
 }
 

@@ -34,6 +34,9 @@ impl Mode {
             Mode::Ladder => "↑",
         }
     }
+    pub fn click(self, target: Mode) -> Self {
+        if target == self { self.next() } else { target }
+    }
 }
 
 #[derive(Clone)]

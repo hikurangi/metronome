@@ -54,9 +54,9 @@ pub fn Timer() -> Element {
                 tokio::time::sleep(std::time::Duration::from_millis(16)).await;
                 phase.set(Phase::from(h.phase.load(Ordering::Relaxed)));
                 session_elapsed.set(h.session_elapsed.load(Ordering::Relaxed));
-                session_total.set(h.session_total.load(Ordering::Relaxed));
-                step_elapsed.set(h.step_elapsed.load(Ordering::Relaxed));
-                step_total.set(h.step_total.load(Ordering::Relaxed));
+                session_total.set(h.session_total_ms.load(Ordering::Relaxed));
+                step_elapsed.set(h.step_elapsed_ms.load(Ordering::Relaxed));
+                step_total.set(h.step_total_ms.load(Ordering::Relaxed));
                 current_step.set(h.current_step.load(Ordering::Relaxed));
                 total_steps.set(h.total_steps.load(Ordering::Relaxed));
                 is_paused.set(h.paused.load(Ordering::Relaxed));

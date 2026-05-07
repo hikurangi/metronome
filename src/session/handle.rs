@@ -36,10 +36,11 @@ pub enum Cmd {
 pub struct SessionHandle {
     // state → UI
     pub phase: AtomicU8,
-    pub session_elapsed: AtomicU64, // ms
-    pub session_total: AtomicU64,   // ms
-    pub step_elapsed: AtomicU64,    // ms (Ladder)
-    pub step_total: AtomicU64,      // ms (Ladder)
+    pub session_elapsed: AtomicU64,      // ms
+    pub session_total_ms: AtomicU64,     // ms
+    pub session_remaining_ms: AtomicU64, // ms
+    pub step_elapsed_ms: AtomicU64,      // ms (Ladder)
+    pub step_total_ms: AtomicU64,        // ms (Ladder)
     pub current_step: AtomicUsize,
     pub total_steps: AtomicUsize,
     pub paused: AtomicBool,
@@ -55,9 +56,10 @@ impl SessionHandle {
         Self {
             phase: AtomicU8::new(Phase::Idle as u8),
             session_elapsed: AtomicU64::new(0),
-            session_total: AtomicU64::new(0),
-            step_elapsed: AtomicU64::new(0),
-            step_total: AtomicU64::new(0),
+            session_total_ms: AtomicU64::new(0),
+            session_remaining_ms: AtomicU64::new(0),
+            step_elapsed_ms: AtomicU64::new(0),
+            step_total_ms: AtomicU64::new(0),
             current_step: AtomicUsize::new(0),
             total_steps: AtomicUsize::new(0),
             paused: AtomicBool::new(false),

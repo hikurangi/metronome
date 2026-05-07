@@ -1,6 +1,8 @@
-// src/ui/components/mode_slider.rs
+use std::sync::Arc;
+use std::sync::atomic::Ordering;
 
 use crate::context::AppContext;
+use crate::engine::handle::EngineHandle;
 use crate::session::config::Mode;
 use dioxus::prelude::*;
 
@@ -12,6 +14,9 @@ const MODES: [(Mode, &str); 3] = [
 
 #[component]
 pub fn ModeSlider() -> Element {
+    let engine = use_context::<Arc<EngineHandle>>();
+    let engine_drag = Arc::clone(&engine);
+
     let mut ctx = use_context::<Signal<AppContext>>();
     let mut drag_start_x = use_signal(|| 0.0f64);
 
@@ -28,15 +33,16 @@ pub fn ModeSlider() -> Element {
             },
             onmouseup: move |e| {
                 let delta = e.client_coordinates().x - drag_start_x();
-                let current = ctx.read().mode;
-                let next = if delta.abs() < 8.0 || delta > 0.0 {
-                    current.next() // drag right
-                } else {
-                    current.prev() // drag left
-                };
-                ctx.write().mode = next;
+                if delta.abs() >= 8.0 {
+                    let mut c = ctx.write();
+                    let new_mode = if delta > 0.0 { c.mode.next() } else { c.mode.prev() };
+                    if c.is_running {
+                        c.is_running = false;
+                        engine_drag.running.store(false, Ordering::Relaxed);
+                    }
+                    c.mode = new_mode;
+                }
             },
-
             // sliding indicator — translates based on active index
             div {
                 class: "mode-indicator",
@@ -48,9 +54,23 @@ pub fn ModeSlider() -> Element {
                 MODES
                     .iter()
                     .map(|(m, label)| {
-                        let is_active = *m == mode;
+                        let target = *m;
+                        let engine_label = Arc::clone(&engine);
                         rsx! {
-                            span { key: "{label}", class: if is_active { "mode-label active" } else { "mode-label" }, "{label}" }
+                            span {
+                                key: "{label}",
+                                class: if target == mode { "mode-label active" } else { "mode-label" },
+                                onclick: move |_| {
+                                    let mut c = ctx.write();
+                                    let new_mode = c.mode.click(target);
+                                    if c.is_running {
+                                        c.is_running = false;
+                                        engine_label.running.store(false, std::sync::atomic::Ordering::Relaxed);
+                                    }
+                                    c.mode = new_mode;
+                                },
+                                "{label}"
+                            }
                         }
                     })
             }
