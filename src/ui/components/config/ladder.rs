@@ -1,5 +1,3 @@
-// src/ui/components/config/ladder.rs
-
 use crate::context::AppContext;
 use crate::engine::handle::EngineHandle;
 use crate::session::config::SessionStatus;
@@ -20,9 +18,9 @@ fn from_mins_secs(m: u64, s: u64) -> Duration {
 
 #[component]
 pub fn LadderConfigPanel() -> Element {
-    let mut ctx = use_context::<Signal<AppContext>>();
     let engine = use_context::<Arc<EngineHandle>>();
     let session = use_context::<Arc<SessionHandle>>();
+    let mut ctx = use_context::<Signal<AppContext>>();
     let mut session_status = use_context::<Signal<SessionStatus>>();
 
     let cfg = ctx.read().ladder_config.clone();
@@ -156,6 +154,8 @@ pub fn LadderConfigPanel() -> Element {
                 class: "play start config-start",
                 onclick: move |_| {
                     let cfg = ctx.read().ladder_config.clone();
+                    println!("step_duration: {:?}", cfg.step_duration);
+                    println!("step_ms: {}", cfg.step_duration.as_millis());
                     *session.ladder_config.write().unwrap() = Some(cfg.clone());
                     session.mode.store(2, Ordering::Relaxed);
                     engine.bpm.store(cfg.start_bpm, Ordering::Relaxed);

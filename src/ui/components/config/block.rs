@@ -13,9 +13,15 @@ pub fn BlockConfigPanel() -> Element {
     let mut session_status = use_context::<Signal<SessionStatus>>();
 
     let bpm = ctx.read().block_config.bpm;
-    let duration = ctx.read().block_config.duration.as_secs();
-    let mins = duration / 60;
-    let secs = duration % 60;
+    let duration = ctx.read().block_config.duration;
+    let duration_s = duration.as_secs();
+    let mins = duration_s / 60;
+    let secs = duration_s % 60;
+
+    session
+        .session_total_ms
+        // TODO: currently unsafe!!
+        .store(duration.as_millis() as u64, Ordering::Relaxed); // set once, never overwrite
 
     rsx! {
         div { class: "config-panel",
