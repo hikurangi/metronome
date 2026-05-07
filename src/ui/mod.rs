@@ -15,7 +15,7 @@ use std::ops::Deref;
 use std::sync::{Arc, atomic::Ordering};
 
 #[component]
-pub fn Metronome() -> Element {
+pub fn App() -> Element {
     let engine = use_context::<Arc<EngineHandle>>();
     let mut ctx: Signal<AppContext> = use_context::<Signal<AppContext>>();
     let mode = ctx.read().mode;
