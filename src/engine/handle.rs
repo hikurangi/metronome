@@ -14,6 +14,7 @@ pub struct EngineHandle {
     pub current_sub_idx: AtomicUsize,
     pub beat_tick_count: AtomicU64,
     pub sub_tick_count: AtomicU64,
+    pub stop_at_bar: AtomicBool,
     pub beat_states_pending: Arc<RwLock<Option<Vec<Beat>>>>,
     pub sub_states_pending: Arc<RwLock<Option<Vec<Beat>>>>,
 }
@@ -31,6 +32,7 @@ impl EngineHandle {
             bar_count: AtomicU64::new(0),
             beat_tick_count: AtomicU64::new(0),
             sub_tick_count: AtomicU64::new(0),
+            stop_at_bar: AtomicBool::new(false),
             beat_states_pending: Arc::new(RwLock::new(None)),
             sub_states_pending: Arc::new(RwLock::new(None)),
         }

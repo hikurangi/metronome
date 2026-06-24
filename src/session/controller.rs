@@ -29,6 +29,7 @@ pub fn run(session: Arc<SessionHandle>, engine: Arc<EngineHandle>) {
 /// Blocks until a bar boundary, checking for stop/pause commands.
 /// Returns false if Stop was received.
 fn wait_for_bar_boundary(session: &SessionHandle, engine: &EngineHandle) -> bool {
+    engine.stop_at_bar.store(true, Ordering::Relaxed);
     let start_bar = engine.bar_count.load(Ordering::Relaxed);
     loop {
         if check_stop(session, engine) {

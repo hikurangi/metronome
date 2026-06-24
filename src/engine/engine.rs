@@ -137,6 +137,15 @@ pub fn run(
             }
 
             on_tick(beat);
+            if state.beat_index == 0 {
+                handle.bar_count.fetch_add(1, Ordering::Relaxed);
+                if handle.stop_at_bar.load(Ordering::Relaxed) {
+                    handle.stop_at_bar.store(false, Ordering::Relaxed);
+                    handle.running.store(false, Ordering::Relaxed);
+                    // engine loop checks running at top of next iteration — beat 0 never fires
+                }
+            }
+
             handle.current_beat_idx.store(beat_idx, Ordering::Relaxed);
             handle
                 .current_beat_type
