@@ -1,9 +1,13 @@
 use crate::constants::BPM_DEFAULT;
+use crate::session::config::{BlockConfig, LadderConfig, Mode};
 use crate::sound::beat::Beat;
 
 #[derive(Clone)]
 pub struct AppContext {
     pub bpm: u64,
+    pub mode: Mode,
+    pub block_config: BlockConfig,   // persisted
+    pub ladder_config: LadderConfig, // persisted
     pub is_running: bool,
     pub beats_per_bar: usize,
     pub subdivisions: usize,
@@ -21,6 +25,9 @@ impl AppContext {
             subdivisions: 1,
             beat_states: Self::default_beat_states(beats_per_bar),
             sub_states: vec![],
+            mode: Mode::Infinity,
+            block_config: BlockConfig::default(),
+            ladder_config: LadderConfig::default(),
         }
     }
 
@@ -40,13 +47,16 @@ impl AppContext {
 
     pub fn set_subdivisions(&mut self, n: usize) {
         self.subdivisions = n;
-        self.sub_states = vec![Beat::Normal; n.saturating_sub(1)];
-    }
-
-    pub fn generate_pattern(&self) -> Vec<Beat> {
-        self.beat_states
-            .iter()
-            .flat_map(|b| std::iter::once(b.clone()).chain(self.sub_states.iter().cloned()))
-            .collect()
+        let target = n.saturating_sub(1);
+        match target.cmp(&self.sub_states.len()) {
+            std::cmp::Ordering::Greater => {
+                let extra = target - self.sub_states.len();
+                self.sub_states.extend(vec![Beat::SubNormal; extra]);
+            }
+            std::cmp::Ordering::Less => {
+                self.sub_states.truncate(target);
+            }
+            std::cmp::Ordering::Equal => {}
+        }
     }
 }

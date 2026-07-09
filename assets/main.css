@@ -10,22 +10,22 @@
 
 /* ── Themes ──────────────────────────────────────────────────────────────── */
 :root {
-    --bg: #0a0a0a;
-    --fg: #ede8e0;
-    --dim: #1a1a1a;
-    --border: #2d2d2d;
-    --mid: #555;
-    --glow: rgba(237, 232, 224, 0.22);
+    --bg: #f2efe8;
+    --fg: #111;
+    --dim: #e2dfd8;
+    --border: #ccc;
+    --mid: #999;
+    --glow: rgba(0, 0, 0, 0.12);
 }
 
-@media (prefers-color-scheme: light) {
+@media (prefers-color-scheme: dark) {
     :root {
-        --bg: #f2efe8;
-        --fg: #111;
-        --dim: #e2dfd8;
-        --border: #ccc;
-        --mid: #999;
-        --glow: rgba(0, 0, 0, 0.12);
+        --bg: #0a0a0a;
+        --fg: #ede8e0;
+        --dim: #1a1a1a;
+        --border: #2d2d2d;
+        --mid: #555;
+        --glow: rgba(237, 232, 224, 0.22);
     }
 }
 
@@ -115,6 +115,48 @@ body {
     text-transform: uppercase;
     margin-top: -2rem;
 }
+
+.bpm-slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: 100%;
+    max-width: 680px;
+    padding: 0 1.5rem;
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 1px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--fg);
+    border: none;
+    transition: transform 0.1s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.5);
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--fg);
+    border: none;
+}
+
 
 /* ── BPM flash animations ────────────────────────────────────────────────── */
 @keyframes bpm-hi-a {
@@ -258,7 +300,15 @@ body {
 
 .sub-row {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.8rem;
+    justify-content: center;
+}
+
+.sub-row-wrapper {
+    min-height: 2.1rem;
+    display: flex;
+    align-items: center;
     justify-content: center;
 }
 
@@ -294,7 +344,7 @@ body {
 
 .beat.silent {
     background: transparent;
-    box-shadow: inset 0 0 0 2px var(--fg);
+    box-shadow: inset 0 0 0 1px var(--border);
 }
 
 .sub.accent {
@@ -304,12 +354,11 @@ body {
 .sub.normal {
     background: var(--dim);
     box-shadow: inset 0 0 0 1px var(--border);
-
 }
 
 .sub.silent {
     background: transparent;
-    box-shadow: inset 0 0 0 1.5px var(--fg);
+    box-shadow: inset 0 0 0 1px var(--border);
 }
 
 .beat:active,
@@ -408,6 +457,69 @@ body {
     animation: c-lo-b 0.25s ease-out forwards;
 }
 
+/*
+/* ── Ring wrap ─────────────────────────────────────────────── */
+.ring-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sweep {
+    position: absolute;
+    inset: -4px;
+    width: calc(100% + 8px);
+    height: calc(100% + 8px);
+    pointer-events: none;
+    transform: rotate(-90deg);
+    /* start from top */
+    border-radius: 50%;
+}
+
+.sub .sweep {
+    inset: -3px;
+    width: calc(100% + 6px);
+    height: calc(100% + 6px);
+}
+
+/* beat: 2π × 30 ≈ 188 */
+.sweep-fill {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 1.5px;
+    stroke-linecap: round;
+    stroke-dasharray: 188;
+    stroke-dashoffset: 0;
+}
+
+/* sub: 2π × 13 ≈ 82 */
+.sub-ring .sweep-fill {
+    stroke-dasharray: 82;
+    stroke-dashoffset: 82;
+}
+
+
+.sweep.even .sweep-fill {
+    animation: sweep-even linear forwards;
+}
+
+.sweep.odd .sweep-fill {
+    animation: sweep-odd linear forwards;
+}
+
+.sweep.hidden {
+    visibility: hidden;
+}
+
+.sub-ring.even .sweep-fill {
+    animation: sweep-sub-even linear forwards;
+}
+
+.sub-ring.odd .sweep-fill {
+    animation: sweep-sub-odd linear forwards;
+}
+
 /* ── Subdivision control ─────────────────────────────────────────────────── */
 .ctrl-group {
     display: flex;
@@ -451,4 +563,304 @@ body {
 
 .play:active {
     transform: scale(0.97);
+}
+
+/* ── Mode slider ──────────────────────────────────────────────────────────── */
+.mode-slider {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 2rem;
+    position: absolute;
+    bottom: 1.5rem;
+}
+
+.mode-pip {
+    background: none;
+    border: none;
+    color: var(--mid);
+    font-size: 1rem;
+    width: 2rem;
+    height: 2rem;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: color 0.15s, background 0.15s;
+}
+
+.mode-pip.active {
+    color: var(--fg);
+    background: var(--dim);
+}
+
+/* ── Config panel ─────────────────────────────────────────────────────────── */
+.config-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.8rem;
+    align-items: center;
+    width: 100%;
+    max-width: 360px;
+}
+
+.config-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    letter-spacing: 0.05em;
+    color: var(--fg);
+}
+
+.config-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    width: 100%;
+}
+
+.config-field label {
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    color: var(--mid);
+    text-transform: uppercase;
+}
+
+.config-input-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.config-input-row input[type="number"] {
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    color: var(--fg);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    width: 4ch;
+    text-align: right;
+    outline: none;
+    -moz-appearance: textfield;
+    padding: 0;
+}
+
+.config-input-row input[type="number"]::-webkit-inner-spin-button,
+.config-input-row input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+}
+
+.config-input-row input[type="number"]:focus {
+    border-bottom-color: var(--fg);
+}
+
+.config-unit {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--mid);
+    text-transform: uppercase;
+}
+
+.config-start {
+    margin-top: 0.5rem;
+    width: 100%;
+    text-align: center;
+}
+
+/* ── Dual play controls (Block/Ladder) ────────────────────────────────────── */
+.play-controls {
+    display: flex;
+    gap: 0.8rem;
+}
+
+/* ── Timer ───────────────────────────────────────────────────────────────── */
+.timer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.timer-main {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 5rem;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+    cursor: pointer;
+    transition: opacity 0.15s;
+    opacity: 0.9;
+}
+
+.timer-main:hover {
+    opacity: 1;
+}
+
+.timer-phase {
+    font-size: 0.55rem;
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+    color: var(--mid);
+}
+
+.timer-step-row {
+    display: flex;
+    gap: 1.2rem;
+    align-items: baseline;
+    margin-top: 0.2rem;
+}
+
+.timer-step-count {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--mid);
+}
+
+.timer-step-remaining {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    color: var(--mid);
+    letter-spacing: 0.02em;
+}
+
+/* ── Mode slider ──────────────────────────────────────────────────────────── */
+.mode-slider {
+    position: absolute;
+    bottom: 1.8rem;
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: 2rem;
+    padding: 0.3rem;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    gap: 0;
+}
+
+.mode-indicator {
+    position: absolute;
+    left: 0.3rem;
+    width: calc(33.333% - 0.2rem);
+    height: calc(100% - 0.6rem);
+    background: var(--dim);
+    border: 1px solid var(--border);
+    border-radius: 1.5rem;
+    transition: transform 0.2s cubic-bezier(0.34, 1.2, 0.64, 1);
+    pointer-events: none;
+}
+
+.mode-label {
+    position: relative;
+    width: 3rem;
+    text-align: center;
+    font-size: 1rem;
+    padding: 0.3rem 0;
+    color: var(--mid);
+    transition: color 0.15s;
+    z-index: 1;
+}
+
+.mode-label.active {
+    color: var(--fg);
+}
+
+/* ── Config panels ────────────────────────────────────────────────────────── */
+.config-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    width: 100%;
+    max-width: 340px;
+    padding-bottom: 4rem;
+    /* clear mode slider */
+}
+
+.config-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem;
+    letter-spacing: 0.04em;
+    color: var(--fg);
+    line-height: 1;
+}
+
+.config-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+    width: 100%;
+}
+
+.config-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    width: 100%;
+}
+
+.config-field label {
+    font-size: 0.55rem;
+    letter-spacing: 0.45em;
+    color: var(--mid);
+    text-transform: uppercase;
+}
+
+.config-input-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.2rem;
+    transition: border-color 0.15s;
+}
+
+.config-input-row:focus-within {
+    border-bottom-color: var(--fg);
+}
+
+.config-input-row input[type="number"] {
+    background: none;
+    border: none;
+    color: var(--fg);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem;
+    width: 4ch;
+    text-align: right;
+    outline: none;
+    line-height: 1;
+    padding: 0;
+    -moz-appearance: textfield;
+}
+
+.config-input-row input[type="number"]::-webkit-inner-spin-button,
+.config-input-row input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+}
+
+/* negative values (ladder increment) can be wider */
+.config-input-row input[type="number"].wide {
+    width: 5ch;
+}
+
+.config-unit {
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
+    color: var(--mid);
+    text-transform: uppercase;
+    padding-bottom: 0.3rem;
+}
+
+.config-separator {
+    color: var(--border);
+    font-size: 1.2rem;
+    padding-bottom: 0.15rem;
+}
+
+.config-start {
+    width: 100%;
+    text-align: center;
+    margin-top: 0.5rem;
+    letter-spacing: 0.35em;
 }
